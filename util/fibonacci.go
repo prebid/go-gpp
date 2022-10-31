@@ -15,13 +15,13 @@ func fibonacci(i int) uint16 {
 
 // ReadFibonacciInt parses 1 fibonacci encoded int from the data array, starting at the given index
 // Note that 0 cannot be fibonacci encoded, and thus will only be seen if there is an error.
-func ReadFibonacciInt(bs *BitStream) (uint16, error) {
+func (bs *BitStream) ReadFibonacciInt() (uint16, error) {
 
-	lastBit, err := ReadByte1(bs)
+	lastBit, err := bs.ReadByte1()
 	if err != nil {
 		return 0, err
 	}
-	nextBit, err := ReadByte1(bs)
+	nextBit, err := bs.ReadByte1()
 	if err != nil {
 		return 0, err
 	}
@@ -33,7 +33,7 @@ func ReadFibonacciInt(bs *BitStream) (uint16, error) {
 	// nextBit are set, we discard nextBit and return the result
 	for i := 3; (lastBit == 0) || (nextBit == 0); i++ {
 		lastBit = nextBit
-		nextBit, err = ReadByte1(bs)
+		nextBit, err = bs.ReadByte1()
 		if err != nil {
 			return 0, err
 		}
@@ -47,8 +47,8 @@ func ReadFibonacciInt(bs *BitStream) (uint16, error) {
 }
 
 // ReadFibonacciRange
-func ReadFibonacciRange(bs *BitStream) (*IntRange, error) {
-	numEntries, err := ReadUInt12(bs)
+func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
+	numEntries, err := bs.ReadUInt12()
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +56,12 @@ func ReadFibonacciRange(bs *BitStream) (*IntRange, error) {
 
 	ranges := make([]IRange, numEntries)
 	for i := range ranges {
-		bit, err := ReadByte1(bs)
+		bit, err := bs.ReadByte1()
 		if err != nil {
 			return nil, err
 		}
 		if bit == 0 {
-			entry, err := ReadFibonacciInt(bs)
+			entry, err := bs.ReadFibonacciInt()
 			if err != nil {
 				return nil, err
 			}
@@ -71,11 +71,11 @@ func ReadFibonacciRange(bs *BitStream) (*IntRange, error) {
 				maxValue = entry
 			}
 		} else {
-			ranges[i].StartID, err = ReadFibonacciInt(bs)
+			ranges[i].StartID, err = bs.ReadFibonacciInt()
 			if err != nil {
 				return nil, err
 			}
-			ranges[i].EndID, err = ReadFibonacciInt(bs)
+			ranges[i].EndID, err = bs.ReadFibonacciInt()
 			if err != nil {
 				return nil, err
 			}

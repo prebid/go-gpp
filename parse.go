@@ -1,7 +1,6 @@
 package gpp
 
 import (
-	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -10,10 +9,9 @@ import (
 )
 
 type GppContainer struct {
-	Version        int
-	Sectiontypes   []constants.SectionID
-	Sections       []Section
-	SectionStrings []string
+	Version      int
+	SectionTypes []constants.SectionID
+	Sections     []Section
 }
 
 type Section interface {
@@ -24,48 +22,71 @@ type Section interface {
 func Parse(v string) (GppContainer, error) {
 	var gpp GppContainer
 
-	gpp.SectionStrings = strings.Split(v, "~")
+	sectionStrings := strings.Split(v, "~")
 
-	buff := []byte(gpp.SectionStrings[0])
-	decoded := make([]byte, base64.RawURLEncoding.DecodedLen(len(buff)))
-	n, err := base64.RawURLEncoding.Decode(decoded, buff)
+	bs, err := util.NewBitStreamFromBase64(sectionStrings[0])
 	if err != nil {
 		return gpp, err
 	}
-	decoded = decoded[:n:n]
+	if bs.Len() < 3 {
+		return gpp, fmt.Errorf("GPP Parse: a GPP string should be at least 3 bytes long")
+	}
 
-	bs := util.NewBitStream(decoded)
-
-	gppType, err := util.ReadByte6(bs)
 	if err != nil {
 		return gpp, err
 	}
-	if gppType != 3 {
-		return gpp, fmt.Errorf("GPP Parse: a GPP string header must have type=3, got %d", gppType)
+	if sectionStrings[0][0] != constants.SectionGPPByte {
+		return gpp, fmt.Errorf("GPP Parse: a GPP string header must have type=%d", constants.SectionGPP)
 	}
+	bs.SetPosition(6)
 
-	ver, err := util.ReadByte6(bs)
+	ver, err := bs.ReadByte6()
 	if err != nil {
 		return gpp, err
 	}
-	fmt.Printf("Version is %d\n", int(ver))
 	gpp.Version = int(ver)
 
-	intRange, err := util.ReadFibonacciRange(bs)
+	intRange, err := bs.ReadFibonacciRange()
 	if err != nil {
 		return gpp, err
 	}
 
-	secIDs := make([]constants.SectionID, len(intRange.Range)+1)
-	secIDs[0] = 3 // GPP Header section has an "ID" of 3
+	// We do not count the GPP header as a section
+	secCount := len(sectionStrings) - 1
+	secIDs := make([]constants.SectionID, 0, secCount)
 
-	for i, sec := range intRange.Range {
-		if sec.StartID != sec.EndID {
-			return gpp, fmt.Errorf("GPP Parse: Sections Range(Int) contains a range per entry")
+	for _, sec := range intRange.Range {
+		for i := sec.StartID; i <= sec.EndID; i++ {
+			secIDs = append(secIDs, constants.SectionID(i))
 		}
-		secIDs[i+1] = constants.SectionID(sec.StartID)
 	}
-	gpp.Sectiontypes = secIDs
+	if len(secIDs) != secCount {
+		return gpp, fmt.Errorf("Section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)
+	}
+	gpp.SectionTypes = secIDs
+
+	sections := make([]Section, secCount)
+	for i, id := range secIDs {
+		switch id {
+		default:
+			sections[i] = GenericSection{sectionID: id, value: sectionStrings[i+1]}
+		}
+	}
+
+	gpp.Sections = sections
 
 	return gpp, nil
+}
+
+type GenericSection struct {
+	sectionID constants.SectionID
+	value     string
+}
+
+func (gs GenericSection) GetID() constants.SectionID {
+	return gs.sectionID
+}
+
+func (gs GenericSection) GetValue() string {
+	return gs.value
 }

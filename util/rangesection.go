@@ -1,8 +1,8 @@
 package util
 
 // ReadIntRange parses a Range(Int) and returns an IntRange struct
-func ReadIntRange(bs *BitStream) (*IntRange, error) {
-	numEntries, err := ReadUInt12(bs)
+func (bs *BitStream) ReadIntRange() (*IntRange, error) {
+	numEntries, err := bs.ReadUInt12()
 	if err != nil {
 		return nil, err
 	}
@@ -10,12 +10,12 @@ func ReadIntRange(bs *BitStream) (*IntRange, error) {
 
 	ranges := make([]IRange, numEntries)
 	for i := range ranges {
-		bit, err := ReadByte1(bs)
+		bit, err := bs.ReadByte1()
 		if err != nil {
 			return nil, err
 		}
 		if bit == 0 {
-			entry, err := ReadUInt16(bs)
+			entry, err := bs.ReadUInt16()
 			if err != nil {
 				return nil, err
 			}
@@ -25,11 +25,11 @@ func ReadIntRange(bs *BitStream) (*IntRange, error) {
 				maxValue = entry
 			}
 		} else {
-			ranges[i].StartID, err = ReadUInt16(bs)
+			ranges[i].StartID, err = bs.ReadUInt16()
 			if err != nil {
 				return nil, err
 			}
-			ranges[i].EndID, err = ReadUInt16(bs)
+			ranges[i].EndID, err = bs.ReadUInt16()
 			if err != nil {
 				return nil, err
 			}

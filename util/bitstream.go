@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"fmt"
 )
@@ -15,6 +16,18 @@ func NewBitStream(b []byte) *BitStream {
 	return &BitStream{p: 0, b: b}
 }
 
+// NewBitStreamFromBase64 creates a new bit stream object from a base64 encoded string
+func NewBitStreamFromBase64(encoded string) (*BitStream, error) {
+	buff := []byte(encoded)
+	decoded := make([]byte, base64.RawURLEncoding.DecodedLen(len(buff)))
+	n, err := base64.RawURLEncoding.Decode(decoded, buff)
+	if err != nil {
+		return nil, err
+	}
+	decoded = decoded[:n:n]
+	return NewBitStream(decoded), nil
+}
+
 // GetPosition reads out the position of the bit pointer in the bit stream
 func (bs *BitStream) GetPosition() uint16 {
 	return bs.p
@@ -25,9 +38,13 @@ func (bs *BitStream) SetPosition(pos uint16) {
 	bs.p = pos
 }
 
-// Returns true if the bitIndex'th bit in data is a 1, and false if it's a 0.
+// Len returns the number of bytes in the BitStream
+func (bs *BitStream) Len() uint16 {
+	return uint16(len(bs.b))
+}
+
 // ReadByte1 reads 1 bit fron the bitstream, advancing the pointer
-func ReadByte1(bs *BitStream) (byte, error) {
+func (bs *BitStream) ReadByte1() (byte, error) {
 	b, err := ParseByte1(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 1
@@ -48,7 +65,7 @@ func ParseByte1(data []byte, bitStartIndex uint16) (byte, error) {
 }
 
 // ReadByte4 reads 4 bits fron the bitstream, advancing the pointer
-func ReadByte4(bs *BitStream) (byte, error) {
+func (bs *BitStream) ReadByte4() (byte, error) {
 	b, err := ParseByte4(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 4
@@ -79,7 +96,7 @@ func ParseByte4(data []byte, bitStartIndex uint16) (byte, error) {
 }
 
 // ReadByte6 reads 6 bits fron the bitstream, advancing the pointer
-func ReadByte6(bs *BitStream) (byte, error) {
+func (bs *BitStream) ReadByte6() (byte, error) {
 	b, err := ParseByte6(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 6
@@ -111,7 +128,7 @@ func ParseByte6(data []byte, bitStartIndex uint16) (byte, error) {
 }
 
 // ReadByte8 reads 8 bits fron the bitstream, advancing the pointer
-func ReadByte8(bs *BitStream) (byte, error) {
+func (bs *BitStream) ReadByte8() (byte, error) {
 	b, err := ParseByte8(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 8
@@ -141,7 +158,7 @@ func ParseByte8(data []byte, bitStartIndex uint16) (byte, error) {
 }
 
 // ReadUInt12 reads 12 bits fron the bitstream, advancing the pointer
-func ReadUInt12(bs *BitStream) (uint16, error) {
+func (bs *BitStream) ReadUInt12() (uint16, error) {
 	i, err := ParseUInt12(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 12
@@ -176,7 +193,7 @@ func ParseUInt12(data []byte, bitStartIndex uint16) (uint16, error) {
 }
 
 // ReadUInt16 reads 16 bits fron the bitstream, advancing the pointer
-func ReadUInt16(bs *BitStream) (uint16, error) {
+func (bs *BitStream) ReadUInt16() (uint16, error) {
 	i, err := ParseUInt16(bs.b, bs.p)
 	if err == nil {
 		bs.p = bs.p + 16

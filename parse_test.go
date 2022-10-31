@@ -19,9 +19,11 @@ func TestParse(t *testing.T) {
 			description: "GPP string with EU TCF V2",
 			gppString:   "DBABMA~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
 			expected: GppContainer{
-				Version:        1,
-				SectionStrings: []string{"DBABMA", "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"},
-				Sectiontypes:   []constants.SectionID{3, 2},
+				Version: 1,
+				// SectionStrings: []string{"DBABMA", "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"},
+				SectionTypes: []constants.SectionID{2},
+				Sections: []Section{GenericSection{sectionID: 2,
+					value: "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"}},
 			},
 		},
 	}
