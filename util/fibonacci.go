@@ -53,6 +53,7 @@ func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
 		return nil, err
 	}
 	var maxValue uint16
+	var offset uint16
 
 	ranges := make([]IRange, numEntries)
 	for i := range ranges {
@@ -61,24 +62,29 @@ func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
 			return nil, err
 		}
 		if bit == 0 {
-			entry, err := bs.ReadFibonacciInt()
+			offset, err := bs.ReadFibonacciInt()
 			if err != nil {
 				return nil, err
 			}
+			entry := offset + maxValue
 			ranges[i].StartID = entry
 			ranges[i].EndID = entry
 			if entry > maxValue {
 				maxValue = entry
 			}
 		} else {
-			ranges[i].StartID, err = bs.ReadFibonacciInt()
+			// first entry is an offset from the previous entry
+			offset, err = bs.ReadFibonacciInt()
+			ranges[i].StartID = maxValue + offset
 			if err != nil {
 				return nil, err
 			}
-			ranges[i].EndID, err = bs.ReadFibonacciInt()
+			// Second entry in a Fibonacci range is an offset from the first.
+			offset, err = bs.ReadFibonacciInt()
 			if err != nil {
 				return nil, err
 			}
+			ranges[i].EndID = ranges[i].StartID + offset
 			if ranges[i].EndID > maxValue {
 				maxValue = ranges[i].EndID
 			}

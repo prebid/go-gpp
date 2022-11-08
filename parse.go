@@ -8,6 +8,11 @@ import (
 	"github.com/prebid/go-gpp/util"
 )
 
+const (
+	SectionGPPByte  byte = 'D'
+	MaxHeaderLength      = 3
+)
+
 type GppContainer struct {
 	Version      int
 	SectionTypes []constants.SectionID
@@ -28,16 +33,20 @@ func Parse(v string) (GppContainer, error) {
 	if err != nil {
 		return gpp, err
 	}
-	if bs.Len() < 3 {
+	if bs.Len() < MaxHeaderLength {
 		return gpp, fmt.Errorf("GPP Parse: a GPP string should be at least 3 bytes long")
 	}
 
 	if err != nil {
 		return gpp, err
 	}
-	if sectionStrings[0][0] != constants.SectionGPPByte {
+	// base64 encoding codes just 6 bits into each byte. The first 6 bits of the header must always evaluate
+	// to the integer '3' as the GPP header type. Short cut the processing of a 6 bit integer with a simple
+	// byte comparison to shave off a few CPU cycles.
+	if sectionStrings[0][0] != SectionGPPByte {
 		return gpp, fmt.Errorf("GPP Parse: a GPP string header must have type=%d", constants.SectionGPP)
 	}
+	// We checked the GPP header type above outside of the bitstream framework, so we advance the bit stream past the first 6 bits.
 	bs.SetPosition(6)
 
 	ver, err := bs.ReadByte6()

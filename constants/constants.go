@@ -12,5 +12,3 @@ const (
 	SectionUSPUT  SectionID = 11
 	SectionUSPCT  SectionID = 12
 )
-
-const SectionGPPByte byte = 'D'
