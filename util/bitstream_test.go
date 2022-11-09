@@ -16,6 +16,26 @@ type testDefinition struct {
 	value  uint64 // The value we expect the function to return (64 bit to allow for future functions that extract larger ints)
 }
 
+var test1Bit = []testDefinition{
+	{testdata, 2, 0}, // testdata 0 in first byte
+	{testdata, 5, 1}, // testdata 1 in first byte
+}
+
+func TestReadByte1(t *testing.T) {
+	bs := BitStream{b: testdata, p: 80}
+
+	b, err := bs.ReadByte1()
+	assertStringsEqual(t, "ParseByte1 expected 1 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
+
+	for _, test := range test1Bit {
+		bs = BitStream{b: test.data, p: test.offset}
+		b, err = ParseByte1(test.data, test.offset)
+		assertNilError(t, err)
+		assertBytesEqual(t, byte(test.value), b)
+	}
+
+}
+
 var test4Bits = []testDefinition{
 	{testdata, 21, 7},           // testdata duplicate of Offset which involves flowing over to a second byte
 	{testdata, 12, 2},           // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
