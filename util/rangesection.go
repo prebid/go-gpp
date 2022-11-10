@@ -1,10 +1,12 @@
 package util
 
+import "fmt"
+
 // ReadIntRange parses a Range(Int) and returns an IntRange struct
 func (bs *BitStream) ReadIntRange() (*IntRange, error) {
 	numEntries, err := bs.ReadUInt12()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error reading size of Range(Int): %s", err)
 	}
 	var maxValue uint16
 
@@ -12,12 +14,12 @@ func (bs *BitStream) ReadIntRange() (*IntRange, error) {
 	for i := range ranges {
 		bit, err := bs.ReadByte1()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error reading the boolean bit of a Range(Int) entry: %s", err)
 		}
 		if bit == 0 {
 			entry, err := bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading an int value in a Range(Int) entry: %s", err)
 			}
 			ranges[i].StartID = entry
 			ranges[i].EndID = entry
@@ -27,11 +29,11 @@ func (bs *BitStream) ReadIntRange() (*IntRange, error) {
 		} else {
 			ranges[i].StartID, err = bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading first int value in a Range(Int) entry: %s", err)
 			}
 			ranges[i].EndID, err = bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading second int value in a Range(Int) entry: %s", err)
 			}
 			if ranges[i].EndID > maxValue {
 				maxValue = ranges[i].EndID

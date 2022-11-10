@@ -58,7 +58,7 @@ func ParseByte1(data []byte, bitStartIndex uint16) (byte, error) {
 	startByte := bitStartIndex / 8
 	bitOffset := bitStartIndex % 8
 	if uint16(len(data)) < (startByte + 1) {
-		return 0, fmt.Errorf("ParseByte1 expected 1 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected 1 bit at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 	}
 
 	return (data[startByte] & (0x80 >> bitOffset)) >> (7 - bitOffset), nil
@@ -80,12 +80,12 @@ func ParseByte4(data []byte, bitStartIndex uint16) (byte, error) {
 	bitStartOffset := bitStartIndex % 8
 	if bitStartOffset < 5 {
 		if uint16(len(data)) < (startByte + 1) {
-			return 0, fmt.Errorf("ParseByte4 expected 4 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+			return 0, fmt.Errorf("Expected 4 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 		}
 		return (data[startByte] & (0xf0 >> bitStartOffset)) >> (4 - bitStartOffset), nil
 	}
 	if uint16(len(data)) < (startByte+2) && bitStartOffset > 4 {
-		return 0, fmt.Errorf("ParseByte4 expected 4 bits to start at bit %d, but the byte array was only %d bytes long (needs second byte)", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected 4 bits to start at bit %d, but the byte array was only %d bytes long (needs second byte)", bitStartIndex, len(data))
 	}
 
 	leftBits := (data[startByte] & (0xf0 >> bitStartOffset)) << (bitStartOffset - 4)
@@ -111,12 +111,12 @@ func ParseByte6(data []byte, bitStartIndex uint16) (byte, error) {
 	bitStartOffset := bitStartIndex % 8
 	if bitStartOffset < 3 {
 		if uint16(len(data)) < (startByte + 1) {
-			return 0, fmt.Errorf("ParseByte6 expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+			return 0, fmt.Errorf("Expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 		}
 		return data[startByte] >> (2 - bitStartIndex), nil
 	}
 	if uint16(len(data)) < (startByte + 2) {
-		return 0, fmt.Errorf("ParseByte6 expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 	}
 
 	leftBits := (data[startByte] & (0xfc >> bitStartOffset)) << (bitStartOffset - 2)
@@ -143,12 +143,12 @@ func ParseByte8(data []byte, bitStartIndex uint16) (byte, error) {
 	bitStartOffset := bitStartIndex % 8
 	if bitStartOffset == 0 {
 		if uint16(len(data)) < (startByte + 1) {
-			return 0, fmt.Errorf("ParseByte8 expected 8 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+			return 0, fmt.Errorf("Expected 8 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 		}
 		return data[startByte], nil
 	}
 	if uint16(len(data)) < (startByte + 2) {
-		return 0, fmt.Errorf("ParseByte8 expected 8 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected 8 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 	}
 
 	leftBits := (data[startByte] & (0xff >> bitStartOffset)) << bitStartOffset
@@ -177,17 +177,17 @@ func ParseUInt12(data []byte, bitStartIndex uint16) (uint16, error) {
 		endByte++
 	}
 	if uint16(len(data)) < endByte {
-		return 0, fmt.Errorf("ParseUInt12 expected a 12-bit int to start at bit %d, but the byte array was only %d bytes long",
+		return 0, fmt.Errorf("Expected a 12-bit int to start at bit %d, but the byte array was only %d bytes long",
 			bitStartIndex, len(data))
 	}
 
 	leftByte, err := ParseByte4(data, bitStartIndex)
 	if err != nil {
-		return 0, fmt.Errorf("ParseUInt12 error on left byte: %s", err)
+		return 0, fmt.Errorf("Error reading first 4 bits of a 12 bit integer: %s", err)
 	}
 	rightByte, err := ParseByte8(data, bitStartIndex+4)
 	if err != nil {
-		return 0, fmt.Errorf("ParseUInt12 error on right byte: %s", err)
+		return 0, fmt.Errorf("Error reading the last 8 bits of a 12 bit integer: %s", err)
 	}
 	return binary.BigEndian.Uint16([]byte{leftByte, rightByte}), nil
 }
@@ -208,21 +208,21 @@ func ParseUInt16(data []byte, bitStartIndex uint16) (uint16, error) {
 	bitStartOffset := bitStartIndex % 8
 	if bitStartOffset == 0 {
 		if uint16(len(data)) < (startByte + 2) {
-			return 0, fmt.Errorf("ParseUInt16 expected a 16-bit int to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+			return 0, fmt.Errorf("Expected a 16-bit int to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 		}
 		return binary.BigEndian.Uint16(data[startByte : startByte+2]), nil
 	}
 	if uint16(len(data)) < (startByte + 3) {
-		return 0, fmt.Errorf("ParseUInt16 expected a 16-bit int to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected a 16-bit int to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 	}
 
 	leftByte, err := ParseByte8(data, bitStartIndex)
 	if err != nil {
-		return 0, fmt.Errorf("ParseUInt16 error on left byte: %s", err)
+		return 0, fmt.Errorf("Error reading the first 8 bits of a 16 bit integer: %s", err)
 	}
 	rightByte, err := ParseByte8(data, bitStartIndex+8)
 	if err != nil {
-		return 0, fmt.Errorf("ParseUInt16 error on right byte: %s", err)
+		return 0, fmt.Errorf("Error reading the last 8 bits of a 16 bit integer: %s", err)
 	}
 	return binary.BigEndian.Uint16([]byte{leftByte, rightByte}), nil
 }
