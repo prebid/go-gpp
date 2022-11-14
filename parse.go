@@ -1,7 +1,6 @@
 package gpp
 
 import (
-	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -9,11 +8,15 @@ import (
 	"github.com/prebid/go-gpp/util"
 )
 
+const (
+	SectionGPPByte  byte = 'D'
+	MaxHeaderLength      = 3
+)
+
 type GppContainer struct {
-	Version        int
-	Sectiontypes   []constants.SectionID
-	Sections       []Section
-	SectionStrings []string
+	Version      int
+	SectionTypes []constants.SectionID
+	Sections     []Section
 }
 
 type Section interface {
@@ -24,48 +27,72 @@ type Section interface {
 func Parse(v string) (GppContainer, error) {
 	var gpp GppContainer
 
-	gpp.SectionStrings = strings.Split(v, "~")
+	sectionStrings := strings.Split(v, "~")
 
-	buff := []byte(gpp.SectionStrings[0])
-	decoded := make([]byte, base64.RawURLEncoding.DecodedLen(len(buff)))
-	n, err := base64.RawURLEncoding.Decode(decoded, buff)
+	bs, err := util.NewBitStreamFromBase64(sectionStrings[0])
 	if err != nil {
-		return gpp, err
+		return gpp, fmt.Errorf("Error parsing GPP headeer, base64 decoding: %s", err)
 	}
-	decoded = decoded[:n:n]
+	if bs.Len() < MaxHeaderLength {
+		return gpp, fmt.Errorf("Error parsing GPP headeer, should be at least %d bytes long", MaxHeaderLength)
+	}
 
-	bs := util.NewBitStream(decoded)
+	// base64 encoding codes just 6 bits into each byte. The first 6 bits of the header must always evaluate
+	// to the integer '3' as the GPP header type. Short cut the processing of a 6 bit integer with a simple
+	// byte comparison to shave off a few CPU cycles.
+	if sectionStrings[0][0] != SectionGPPByte {
+		return gpp, fmt.Errorf("Error parsing GPP headeer, header must have type=%d", constants.SectionGPP)
+	}
+	// We checked the GPP header type above outside of the bitstream framework, so we advance the bit stream past the first 6 bits.
+	bs.SetPosition(6)
 
-	gppType, err := util.ReadByte6(bs)
+	ver, err := bs.ReadByte6()
 	if err != nil {
-		return gpp, err
+		return gpp, fmt.Errorf("Error parsing GPP headeer, unable to parse GPP version: %s", err)
 	}
-	if gppType != 3 {
-		return gpp, fmt.Errorf("GPP Parse: a GPP string header must have type=3, got %d", gppType)
-	}
-
-	ver, err := util.ReadByte6(bs)
-	if err != nil {
-		return gpp, err
-	}
-	fmt.Printf("Version is %d\n", int(ver))
 	gpp.Version = int(ver)
 
-	intRange, err := util.ReadFibonacciRange(bs)
+	intRange, err := bs.ReadFibonacciRange()
 	if err != nil {
-		return gpp, err
+		return gpp, fmt.Errorf("Error parsing GPP headeer, section identifiers: %s", err)
 	}
 
-	secIDs := make([]constants.SectionID, len(intRange.Range)+1)
-	secIDs[0] = 3 // GPP Header section has an "ID" of 3
+	// We do not count the GPP header as a section
+	secCount := len(sectionStrings) - 1
+	secIDs := make([]constants.SectionID, 0, secCount)
 
-	for i, sec := range intRange.Range {
-		if sec.StartID != sec.EndID {
-			return gpp, fmt.Errorf("GPP Parse: Sections Range(Int) contains a range per entry")
+	for _, sec := range intRange.Range {
+		for i := sec.StartID; i <= sec.EndID; i++ {
+			secIDs = append(secIDs, constants.SectionID(i))
 		}
-		secIDs[i+1] = constants.SectionID(sec.StartID)
 	}
-	gpp.Sectiontypes = secIDs
+	if len(secIDs) != secCount {
+		return gpp, fmt.Errorf("Error parsing GPP headeer, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)
+	}
+	gpp.SectionTypes = secIDs
+
+	sections := make([]Section, secCount)
+	for i, id := range secIDs {
+		switch id {
+		default:
+			sections[i] = GenericSection{sectionID: id, value: sectionStrings[i+1]}
+		}
+	}
+
+	gpp.Sections = sections
 
 	return gpp, nil
+}
+
+type GenericSection struct {
+	sectionID constants.SectionID
+	value     string
+}
+
+func (gs GenericSection) GetID() constants.SectionID {
+	return gs.sectionID
+}
+
+func (gs GenericSection) GetValue() string {
+	return gs.value
 }

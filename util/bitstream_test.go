@@ -29,10 +29,10 @@ var test4Bits = []testDefinition{
 
 func TestParseByte4(t *testing.T) {
 	b, err := ParseByte4(testdata, 46)
-	assertStringsEqual(t, "ParseByte4 expected 4 bits to start at bit 46, but the consent string was only 6 bytes long (needs second byte)", err.Error())
+	assertStringsEqual(t, "Expected 4 bits to start at bit 46, but the byte array was only 6 bytes long (needs second byte)", err.Error())
 
 	b, err = ParseByte4(testdata, 80)
-	assertStringsEqual(t, "ParseByte4 expected 4 bits to start at bit 80, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected 4 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test4Bits {
 		b, err = ParseByte4(test.data, test.offset)
@@ -52,10 +52,10 @@ var test8Bits = []testDefinition{
 
 func TestParseByte8(t *testing.T) {
 	b, err := ParseByte8([]byte{0x44, 0x76}, 11)
-	assertStringsEqual(t, "ParseByte8 expected 8 bitst to start at bit 11, but the consent string was only 2 bytes long", err.Error())
+	assertStringsEqual(t, "Expected 8 bits to start at bit 11, but the byte array was only 2 bytes long", err.Error())
 
 	b, err = ParseByte8([]byte{0x44, 0x76}, 18)
-	assertStringsEqual(t, "ParseByte8 expected 8 bitst to start at bit 18, but the consent string was only 2 bytes long", err.Error())
+	assertStringsEqual(t, "Expected 8 bits to start at bit 18, but the byte array was only 2 bytes long", err.Error())
 
 	for _, test := range test8Bits {
 		b, err = ParseByte8(test.data, test.offset)
@@ -76,13 +76,13 @@ var test12Bits = []testDefinition{
 
 func TestParseUInt12(t *testing.T) {
 	i, err := ParseUInt12(testdata, 44)
-	assertStringsEqual(t, "ParseUInt12 expected a 12-bit int to start at bit 44, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected a 12-bit int to start at bit 44, but the byte array was only 6 bytes long", err.Error())
 
 	i, err = ParseUInt12(testdata, 40)
-	assertStringsEqual(t, "ParseUInt12 expected a 12-bit int to start at bit 40, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected a 12-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
 
 	i, err = ParseUInt12(testdata, 37)
-	assertStringsEqual(t, "ParseUInt12 expected a 12-bit int to start at bit 37, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected a 12-bit int to start at bit 37, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test12Bits {
 		i, err = ParseUInt12(test.data, test.offset)
@@ -102,10 +102,10 @@ var test16Bits = []testDefinition{
 
 func TestParseUInt16(t *testing.T) {
 	i, err := ParseUInt16(testdata, 44)
-	assertStringsEqual(t, "ParseUInt16 expected a 16-bit int to start at bit 44, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected a 16-bit int to start at bit 44, but the byte array was only 6 bytes long", err.Error())
 
 	i, err = ParseUInt16(testdata, 40)
-	assertStringsEqual(t, "ParseUInt16 expected a 16-bit int to start at bit 40, but the consent string was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected a 16-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test16Bits {
 		i, err = ParseUInt16(test.data, test.offset)

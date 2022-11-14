@@ -1,23 +1,25 @@
 package util
 
+import "fmt"
+
 // ReadIntRange parses a Range(Int) and returns an IntRange struct
-func ReadIntRange(bs *BitStream) (*IntRange, error) {
-	numEntries, err := ReadUInt12(bs)
+func (bs *BitStream) ReadIntRange() (*IntRange, error) {
+	numEntries, err := bs.ReadUInt12()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error reading size of Range(Int): %s", err)
 	}
 	var maxValue uint16
 
 	ranges := make([]IRange, numEntries)
 	for i := range ranges {
-		bit, err := ReadByte1(bs)
+		bit, err := bs.ReadByte1()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error reading the boolean bit of a Range(Int) entry: %s", err)
 		}
 		if bit == 0 {
-			entry, err := ReadUInt16(bs)
+			entry, err := bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading an int value in a Range(Int) entry: %s", err)
 			}
 			ranges[i].StartID = entry
 			ranges[i].EndID = entry
@@ -25,13 +27,13 @@ func ReadIntRange(bs *BitStream) (*IntRange, error) {
 				maxValue = entry
 			}
 		} else {
-			ranges[i].StartID, err = ReadUInt16(bs)
+			ranges[i].StartID, err = bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading first int value in a Range(Int) entry: %s", err)
 			}
-			ranges[i].EndID, err = ReadUInt16(bs)
+			ranges[i].EndID, err = bs.ReadUInt16()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading second int value in a Range(Int) entry: %s", err)
 			}
 			if ranges[i].EndID > maxValue {
 				maxValue = ranges[i].EndID

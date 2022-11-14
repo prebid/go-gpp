@@ -1,5 +1,7 @@
 package util
 
+import "fmt"
+
 // Preload the smaller, more common, fibonacci values to speed up lookups.
 var fibLookup [20]uint16 = [20]uint16{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181}
 
@@ -15,15 +17,15 @@ func fibonacci(i int) uint16 {
 
 // ReadFibonacciInt parses 1 fibonacci encoded int from the data array, starting at the given index
 // Note that 0 cannot be fibonacci encoded, and thus will only be seen if there is an error.
-func ReadFibonacciInt(bs *BitStream) (uint16, error) {
+func (bs *BitStream) ReadFibonacciInt() (uint16, error) {
 
-	lastBit, err := ReadByte1(bs)
+	lastBit, err := bs.ReadByte1()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Error reading bit 1 of Integer(Fibonacci): %s", err)
 	}
-	nextBit, err := ReadByte1(bs)
+	nextBit, err := bs.ReadByte1()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Error reading bit 2 of Integer(Fibonacci): %s", err)
 	}
 
 	// First bit encodes "1" if set. (fib(2)=1)
@@ -33,9 +35,9 @@ func ReadFibonacciInt(bs *BitStream) (uint16, error) {
 	// nextBit are set, we discard nextBit and return the result
 	for i := 3; (lastBit == 0) || (nextBit == 0); i++ {
 		lastBit = nextBit
-		nextBit, err = ReadByte1(bs)
+		nextBit, err = bs.ReadByte1()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("Error reading bit %d of Integer(Fibonacci): %s", i, err)
 		}
 		if lastBit == 1 {
 			result = result + fibonacci(i)
@@ -47,38 +49,44 @@ func ReadFibonacciInt(bs *BitStream) (uint16, error) {
 }
 
 // ReadFibonacciRange
-func ReadFibonacciRange(bs *BitStream) (*IntRange, error) {
-	numEntries, err := ReadUInt12(bs)
+func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
+	numEntries, err := bs.ReadUInt12()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error reading size of Range(Fibonacci): %s", err)
 	}
 	var maxValue uint16
+	var offset uint16
 
 	ranges := make([]IRange, numEntries)
 	for i := range ranges {
-		bit, err := ReadByte1(bs)
+		bit, err := bs.ReadByte1()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error reading the boolean bit of a Range(Fibonacci) entry: %s", err)
 		}
 		if bit == 0 {
-			entry, err := ReadFibonacciInt(bs)
+			offset, err := bs.ReadFibonacciInt()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading an int offset value in a Range(Fibonacci) entry: %s", err)
 			}
+			entry := offset + maxValue
 			ranges[i].StartID = entry
 			ranges[i].EndID = entry
 			if entry > maxValue {
 				maxValue = entry
 			}
 		} else {
-			ranges[i].StartID, err = ReadFibonacciInt(bs)
+			// first entry is an offset from the previous entry
+			offset, err = bs.ReadFibonacciInt()
+			ranges[i].StartID = maxValue + offset
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading first int offset value in a Range(Fibonacci) entry: %s", err)
 			}
-			ranges[i].EndID, err = ReadFibonacciInt(bs)
+			// Second entry in a Fibonacci range is an offset from the first.
+			offset, err = bs.ReadFibonacciInt()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Error reading second int offset value in a Range(Fibonacci) entry: %s", err)
 			}
+			ranges[i].EndID = ranges[i].StartID + offset
 			if ranges[i].EndID > maxValue {
 				maxValue = ranges[i].EndID
 			}
