@@ -41,9 +41,9 @@ func TestParseByte4(t *testing.T) {
 	}
 }
 
-// Used https://cryptii.com/ to convert 8 bit sequeces to integers
+// Used https://cryptii.com/ to convert 8 bit sequences to integers
 var test8Bits = []testDefinition{
-	{testdata, 4, 0x4a}, // Offset that alligns to a nibble
+	{testdata, 4, 0x4a}, // Offset that aligns to a nibble
 	{testdata, 7, 81},   // Odd Offset
 	{testdata, 26, 196}, // Even offset that does not align to a nibble
 	{testdata, 6, 40},   // Second even offset that does not align to a nibble
