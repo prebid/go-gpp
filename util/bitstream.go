@@ -116,7 +116,7 @@ func ParseByte6(data []byte, bitStartIndex uint16) (byte, error) {
 		return data[startByte] >> (2 - bitStartIndex), nil
 	}
 	if uint16(len(data)) < (startByte + 2) {
-		return 0, fmt.Errorf("Expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		return 0, fmt.Errorf("Expected 6 bits to start at bit %d, but the byte array was only %d bytes long (needs second byte)", bitStartIndex, len(data))
 	}
 
 	leftBits := (data[startByte] & (0xfc >> bitStartOffset)) << (bitStartOffset - 2)

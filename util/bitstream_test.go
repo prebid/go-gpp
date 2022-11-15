@@ -17,19 +17,21 @@ type testDefinition struct {
 }
 
 var test1Bit = []testDefinition{
-	{testdata, 2, 0}, // testdata 0 in first byte
-	{testdata, 5, 1}, // testdata 1 in first byte
+	{testdata, 2, 0},  // testdata 0 in first byte
+	{testdata, 5, 1},  // testdata 1 in first byte
+	{testdata, 23, 1}, // testdata 1 in last bit of third byte
+	{testdata, 47, 1}, // testdata 1 in last bit of last byte
 }
 
 func TestReadByte1(t *testing.T) {
 	bs := BitStream{b: testdata, p: 80}
 
 	b, err := bs.ReadByte1()
-	assertStringsEqual(t, "ParseByte1 expected 1 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
+	assertStringsEqual(t, "Expected 1 bit at bit 80, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test1Bit {
 		bs = BitStream{b: test.data, p: test.offset}
-		b, err = ParseByte1(test.data, test.offset)
+		b, err = bs.ReadByte1()
 		assertNilError(t, err)
 		assertBytesEqual(t, byte(test.value), b)
 	}
@@ -47,15 +49,47 @@ var test4Bits = []testDefinition{
 	{[]byte{0x01, 0xe0}, 7, 15}, // Offset which involves flowing over to a second byte
 }
 
-func TestParseByte4(t *testing.T) {
-	b, err := ParseByte4(testdata, 46)
+func TestReadByte4(t *testing.T) {
+	bs := BitStream{b: testdata, p: 46}
+
+	b, err := bs.ReadByte4()
 	assertStringsEqual(t, "Expected 4 bits to start at bit 46, but the byte array was only 6 bytes long (needs second byte)", err.Error())
 
-	b, err = ParseByte4(testdata, 80)
+	bs = BitStream{b: testdata, p: 80}
+	b, err = bs.ReadByte4()
 	assertStringsEqual(t, "Expected 4 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test4Bits {
-		b, err = ParseByte4(test.data, test.offset)
+		bs = BitStream{b: test.data, p: test.offset}
+		b, err = bs.ReadByte4()
+		assertNilError(t, err)
+		assertBytesEqual(t, byte(test.value), b)
+	}
+}
+
+var test6Bits = []testDefinition{
+	{testdata, 21, 29},          // testdata duplicate of Offset which involves flowing over to a second byte
+	{testdata, 12, 8},           // testdata duplicate of Offset which aligns with a nibble
+	{testdata, 6, 10},           // testdata duplicate of Offset which involves flowing over to a second byte
+	{[]byte{0x10}, 0, 4},        // No offset
+	{[]byte{0x92, 0x80}, 4, 10}, // Offset which aligns with a nibble
+	{[]byte{0x99}, 1, 76},       // Offset which doesn't align with a nibble.
+	{[]byte{0x01, 0xe0}, 7, 60}, // Offset which involves flowing over to a second byte
+}
+
+func TestReadByte6(t *testing.T) {
+	bs := BitStream{b: testdata, p: 46}
+
+	b, err := bs.ReadByte6()
+	assertStringsEqual(t, "Expected 6 bits to start at bit 46, but the byte array was only 6 bytes long (needs second byte)", err.Error())
+
+	bs = BitStream{b: testdata, p: 80}
+	b, err = bs.ReadByte6()
+	assertStringsEqual(t, "Expected 6 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
+
+	for _, test := range test6Bits {
+		bs = BitStream{b: test.data, p: test.offset}
+		b, err = bs.ReadByte6()
 		assertNilError(t, err)
 		assertBytesEqual(t, byte(test.value), b)
 	}
@@ -70,15 +104,18 @@ var test8Bits = []testDefinition{
 	{testdata, 8, 162},  // Zero offset
 }
 
-func TestParseByte8(t *testing.T) {
-	b, err := ParseByte8([]byte{0x44, 0x76}, 11)
+func TestReadByte8(t *testing.T) {
+	bs := BitStream{b: []byte{0x44, 0x76}, p: 11}
+	b, err := bs.ReadByte8()
 	assertStringsEqual(t, "Expected 8 bits to start at bit 11, but the byte array was only 2 bytes long", err.Error())
 
-	b, err = ParseByte8([]byte{0x44, 0x76}, 18)
+	bs = BitStream{b: []byte{0x44, 0x76}, p: 18}
+	b, err = bs.ReadByte8()
 	assertStringsEqual(t, "Expected 8 bits to start at bit 18, but the byte array was only 2 bytes long", err.Error())
 
 	for _, test := range test8Bits {
-		b, err = ParseByte8(test.data, test.offset)
+		bs = BitStream{b: test.data, p: test.offset}
+		b, err = bs.ReadByte8()
 		assertNilError(t, err)
 		assertBytesEqual(t, byte(test.value), b)
 	}
@@ -94,18 +131,22 @@ var test12Bits = []testDefinition{
 	{testdata, 36, 0x2b}, // Corner Case
 }
 
-func TestParseUInt12(t *testing.T) {
-	i, err := ParseUInt12(testdata, 44)
+func TestReadUInt12(t *testing.T) {
+	bs := BitStream{b: testdata, p: 44}
+	i, err := bs.ReadUInt12()
 	assertStringsEqual(t, "Expected a 12-bit int to start at bit 44, but the byte array was only 6 bytes long", err.Error())
 
-	i, err = ParseUInt12(testdata, 40)
+	bs = BitStream{b: testdata, p: 40}
+	i, err = bs.ReadUInt12()
 	assertStringsEqual(t, "Expected a 12-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
 
-	i, err = ParseUInt12(testdata, 37)
+	bs = BitStream{b: testdata, p: 37}
+	i, err = bs.ReadUInt12()
 	assertStringsEqual(t, "Expected a 12-bit int to start at bit 37, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test12Bits {
-		i, err = ParseUInt12(test.data, test.offset)
+		bs = BitStream{b: test.data, p: test.offset}
+		i, err = bs.ReadUInt12()
 		assertNilError(t, err)
 		assertUInt16sEqual(t, uint16(test.value), i)
 	}
@@ -120,15 +161,18 @@ var test16Bits = []testDefinition{
 	{testdata, 4, 18976},  // Nibble aligned offset
 }
 
-func TestParseUInt16(t *testing.T) {
-	i, err := ParseUInt16(testdata, 44)
+func TestReadUInt16(t *testing.T) {
+	bs := BitStream{b: testdata, p: 44}
+	i, err := bs.ReadUInt16()
 	assertStringsEqual(t, "Expected a 16-bit int to start at bit 44, but the byte array was only 6 bytes long", err.Error())
 
-	i, err = ParseUInt16(testdata, 40)
+	bs = BitStream{b: testdata, p: 40}
+	i, err = bs.ReadUInt16()
 	assertStringsEqual(t, "Expected a 16-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
 
 	for _, test := range test16Bits {
-		i, err = ParseUInt16(test.data, test.offset)
+		bs = BitStream{b: test.data, p: test.offset}
+		i, err = bs.ReadUInt16()
 		assertNilError(t, err)
 		assertUInt16sEqual(t, uint16(test.value), i)
 	}

@@ -61,12 +61,12 @@ func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
 	for i := range ranges {
 		bit, err := bs.ReadByte1()
 		if err != nil {
-			return nil, fmt.Errorf("Error reading the boolean bit of a Range(Fibonacci) entry: %s", err)
+			return nil, fmt.Errorf("Error reading the boolean bit of a Range(Fibonacci) entry(%d): %s", i, err)
 		}
 		if bit == 0 {
 			offset, err := bs.ReadFibonacciInt()
 			if err != nil {
-				return nil, fmt.Errorf("Error reading an int offset value in a Range(Fibonacci) entry: %s", err)
+				return nil, fmt.Errorf("Error reading an int offset value in a Range(Fibonacci) entry(%d): %s", i, err)
 			}
 			entry := offset + maxValue
 			ranges[i].StartID = entry
@@ -79,12 +79,12 @@ func (bs *BitStream) ReadFibonacciRange() (*IntRange, error) {
 			offset, err = bs.ReadFibonacciInt()
 			ranges[i].StartID = maxValue + offset
 			if err != nil {
-				return nil, fmt.Errorf("Error reading first int offset value in a Range(Fibonacci) entry: %s", err)
+				return nil, fmt.Errorf("Error reading first int offset value in a Range(Fibonacci) entry(%d): %s", i, err)
 			}
 			// Second entry in a Fibonacci range is an offset from the first.
 			offset, err = bs.ReadFibonacciInt()
 			if err != nil {
-				return nil, fmt.Errorf("Error reading second int offset value in a Range(Fibonacci) entry: %s", err)
+				return nil, fmt.Errorf("Error reading second int offset value in a Range(Fibonacci) entry(%d): %s", i, err)
 			}
 			ranges[i].EndID = ranges[i].StartID + offset
 			if ranges[i].EndID > maxValue {
