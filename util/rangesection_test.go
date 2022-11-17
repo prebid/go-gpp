@@ -21,10 +21,10 @@ func TestReadIntRange(t *testing.T) {
 	encoded := "AFAAPABAAFoAMAAyAFLvyW_UgA"
 	bs, err := NewBitStreamFromBase64(encoded)
 
-	assertNilError(t, err)
+	assert.Nil(t, err, "Unexpected error: %v", err)
 
 	ir, err := bs.ReadIntRange()
-	assertNilError(t, err)
+	assert.Nil(t, err, "Unexpected error: %v", err)
 
 	expected := &IntRange{Size: 5, Max: 57257, Range: []IRange{
 		{StartID: 7, EndID: 7},

@@ -18,30 +18,30 @@ import (
 
 // pad the left bits with random data to ensure we test all sorts of byte alignments.
 
-var fibTestData = []testDefinition{
-	{[]byte{0x9b}, 6, 1},                 // (100110)11
-	{[]byte{0x2e, 0x2e}, 11, 2},          // (00101110 001)011(10)
-	{[]byte{0xb0}, 0, 4},                 // 1011(0000)
-	{[]byte{0x29, 0x62}, 6, 7},           // (0010 10)01 011(00010)
-	{[]byte{0x9d, 0x6c}, 5, 12},          // (1001 1)101 011(0 1100)
-	{[]byte{0x24, 0x87}, 8, 14},          // (0010 0100) 1000 011(1)
-	{[]byte{0x58, 0x40, 0x8c}, 5, 1838},  // (0101 1)000 0100 0000 1000 11(00)
-	{[]byte{0x08, 0x11, 0x1a}, 0, 12784}, // 0000 1000 0001 0001 0001 1(010)
+var fibtestData = []testDefinition{
+	{[]byte{0x9b}, 6, 1, ""},                 // (100110)11
+	{[]byte{0x2e, 0x2e}, 11, 2, ""},          // (00101110 001)011(10)
+	{[]byte{0xb0}, 0, 4, ""},                 // 1011(0000)
+	{[]byte{0x29, 0x62}, 6, 7, ""},           // (0010 10)01 011(00010)
+	{[]byte{0x9d, 0x6c}, 5, 12, ""},          // (1001 1)101 011(0 1100)
+	{[]byte{0x24, 0x87}, 8, 14, ""},          // (0010 0100) 1000 011(1)
+	{[]byte{0x58, 0x40, 0x8c}, 5, 1838, ""},  // (0101 1)000 0100 0000 1000 11(00)
+	{[]byte{0x08, 0x11, 0x1a}, 0, 12784, ""}, // 0000 1000 0001 0001 0001 1(010)
 }
 
 func TestReadFibonnaciInt(t *testing.T) {
-	bs := BitStream{b: testdata, p: 47}
+	bs := BitStream{b: testData, p: 47}
 	i, err := bs.ReadFibonacciInt()
-	assert.Equal(t, "Error reading bit 2 of Integer(Fibonacci): Expected 1 bit at bit 48, but the byte array was only 6 bytes long", err.Error())
+	assert.Equal(t, "error reading bit 2 of Integer(Fibonacci): expected 1 bit at bit 48, but the byte array was only 6 bytes long", err.Error())
 
-	// bs = BitStream{b: testdata, p: 40}
+	// bs = BitStream{b: testData, p: 40}
 	// i, err = bs.ReadUInt16()
 	// assertStringsEqual(t, "Expected a 16-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
 
-	for _, test := range fibTestData {
+	for _, test := range fibtestData {
 		bs = BitStream{b: test.data, p: test.offset}
 		i, err = bs.ReadFibonacciInt()
-		assert.Nil(t, err, "Found error: %s", err)
+		assert.Nil(t, err, "Unexpected error: %v", err)
 		assert.Equal(t, int(test.value), int(i))
 	}
 }
@@ -61,7 +61,7 @@ func TestReadFibonacciRange(t *testing.T) {
 	bs := &BitStream{b: []byte{0x00, 0x52, 0xf1, 0xce, 0xf2, 0x07, 0x24, 0x8a, 0xa3, 0x43}}
 
 	ir, err := bs.ReadFibonacciRange()
-	assertNilError(t, err)
+	assert.Nil(t, err, "Unexpected error: %v", err)
 
 	expected := &IntRange{Size: 5, Max: 57257, Range: []IRange{
 		{StartID: 7, EndID: 7},
