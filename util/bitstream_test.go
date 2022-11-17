@@ -44,6 +44,29 @@ func TestReadByte1(t *testing.T) {
 
 }
 
+var test2Bits = []testDefinition{
+	{testdata, 31, 2}, // testdata duplicate of Offset which involves flowing over to a second byte
+	{testdata, 23, 3}, // testdata duplicate of Offset which involves flowing over to a second byte
+	{testdata, 9, 1},  // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+	{testdata, 10, 2}, // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+	{testdata, 44, 2}, // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+	{testdata, 0, 0},  // No offset
+}
+
+func TestParseByte2(t *testing.T) {
+	b, err := ParseByte2(testdata, 47)
+	assertStringsEqual(t, "expected 2 bits to start at bit 47, but the byte array was only 6 bytes long", err.Error())
+
+	b, err = ParseByte2(testdata, 80)
+	assertStringsEqual(t, "expected 2 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
+
+	for _, test := range test2Bits {
+		b, err = ParseByte2(test.data, test.offset)
+		assertNilError(t, err)
+		assertBytesEqual(t, byte(test.value), b)
+	}
+}
+
 func TestReadByte4(t *testing.T) {
 	testSet := map[string]testDefinition{
 		"Bits overrun": {testData, 46, 0,

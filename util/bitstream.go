@@ -64,6 +64,36 @@ func ParseByte1(data []byte, bitStartIndex uint16) (byte, error) {
 	return (data[startByte] & (0x80 >> bitOffset)) >> (7 - bitOffset), nil
 }
 
+// ReadByte2 reads 2 bits fron the bitstream, advancing the pointer
+func (bs *BitStream) ReadByte2() (byte, error) {
+	b, err := ParseByte2(bs.b, bs.p)
+	if err == nil {
+		bs.p = bs.p + 2
+		return b, nil
+	}
+	return 0, err
+}
+
+// ParseByte2 parses 2 bits of data from the data array, starting at the given index
+func ParseByte2(data []byte, bitStartIndex uint16) (byte, error) {
+	startByte := bitStartIndex / 8
+	bitStartOffset := bitStartIndex % 8
+	if bitStartOffset < 7 {
+		if uint16(len(data)) < (startByte + 1) {
+			return 0, fmt.Errorf("expected 2 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+		}
+		return (data[startByte] & (0xc0 >> bitStartOffset) >> (6 - bitStartOffset)), nil
+	}
+	if uint16(len(data)) < (startByte+2) && bitStartOffset > 6 {
+		return 0, fmt.Errorf("expected 2 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
+	}
+
+	leftBits := (data[startByte] & (0xc0 >> bitStartOffset)) << 1
+	overflow := 1
+	rightBits := (data[startByte+1] & (0xc0 << overflow)) >> 7
+	return leftBits | rightBits, nil
+}
+
 // ReadByte4 reads 4 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadByte4() (byte, error) {
 	b, err := ParseByte4(bs.b, bs.p)
@@ -225,4 +255,23 @@ func ParseUInt16(data []byte, bitStartIndex uint16) (uint16, error) {
 		return 0, fmt.Errorf("error reading the last 8 bits of a 16 bit integer: %s", err)
 	}
 	return binary.BigEndian.Uint16([]byte{leftByte, rightByte}), nil
+}
+
+func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
+	result := []byte{}
+
+	if numFields == 0 {
+		return result, fmt.Errorf("attribute NumBitFields is 0")
+	}
+
+	maxFields := numFields * 2
+	for i := 0; i < maxFields; i += 2 {
+		val, err := bs.ReadByte2()
+		if err != nil {
+			return result, err
+		}
+		result = append(result, val)
+	}
+
+	return result, nil
 }
