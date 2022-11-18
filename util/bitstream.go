@@ -274,3 +274,24 @@ func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
 
 	return result, nil
 }
+
+func (bs *BitStream) ReadByteSize(size int, err error) (byte, error) {
+	if err != nil {
+		return uint8(0), err
+	}
+
+	switch size {
+	case 1:
+		return bs.ReadByte1()
+	case 2:
+		return bs.ReadByte2()
+	case 4:
+		return bs.ReadByte4()
+	case 6:
+		return bs.ReadByte6()
+	case 8:
+		return bs.ReadByte8()
+	default:
+		return uint8(0), fmt.Errorf("unknown field size for reading bits: %d", size)
+	}
+}
