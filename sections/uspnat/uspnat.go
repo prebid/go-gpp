@@ -1,8 +1,6 @@
 package uspnat
 
 import (
-	"fmt"
-
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/util"
 )
@@ -41,98 +39,33 @@ func initUSPNATCoreSegment(bs *util.BitStream) (USPNATCoreSegment, error) {
 	var result = USPNATCoreSegment{}
 	var err error
 
-	result.Version, err = bs.ReadByte6()
-	if err != nil {
-		return result, fmt.Errorf("unable to set Version: %s", err.Error())
-	}
+	result.Version, err = bs.ReadByteSize(6, err)
+	result.SharingNotice, err = bs.ReadByteSize(2, err)
+	result.SaleOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SharingOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.TargetedAdvertisingOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataProcessingOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataLimitUseNotice, err = bs.ReadByteSize(2, err)
+	result.SaleOptOut, err = bs.ReadByteSize(2, err)
+	result.SharingOptOut, err = bs.ReadByteSize(2, err)
+	result.TargetedAdvertisingOptOut, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(12, err)
+	result.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2, err)
+	result.PersonalDataConsents, err = bs.ReadByteSize(2, err)
+	result.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
+	result.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
+	result.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
 
-	result.SharingNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingNotice: %s", err.Error())
-	}
-
-	result.SaleOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SaleOptOutNotice: %s", err.Error())
-	}
-
-	result.SharingOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingOptOutNotice: %s", err.Error())
-	}
-
-	result.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set TargetedAdvertisingOptOutNotice: %s", err.Error())
-	}
-
-	result.SensitiveDataProcessingOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataProcessingOptOutNotice: %s", err.Error())
-	}
-
-	result.SensitiveDataLimitUseNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataLimitUseNotice: %s", err.Error())
-	}
-
-	result.SaleOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SaleOptOut: %s", err.Error())
-	}
-	result.SharingOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingOptOut: %s", err.Error())
-	}
-
-	result.TargetedAdvertisingOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set TargetedAdvertisingOptOut: %s", err.Error())
-	}
-
-	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(12)
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataProcessing: %s", err.Error())
-	}
-
-	result.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2)
-	if err != nil {
-		return result, fmt.Errorf("unable to set KnownChildSensitiveDataConsents: %s", err.Error())
-	}
-
-	result.PersonalDataConsents, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set PersonalDataConsents: %s", err.Error())
-	}
-
-	result.MspaCoveredTransaction, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaCoveredTransaction: %s", err.Error())
-	}
-
-	result.MspaOptOutOptionMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaOptOutOptionMode: %s", err.Error())
-	}
-
-	result.MspaServiceProviderMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaServiceProviderMode: %s", err.Error())
-	}
-
-	return result, nil
+	return result, err
 }
 
 func initUSPNATGPCSegment(bs *util.BitStream) (USPNATGPCSegment, error) {
 	var result = USPNATGPCSegment{}
 	var err error
 
-	result.Gpc, err = bs.ReadByte1()
-	if err != nil {
-		return result, fmt.Errorf("unable to set GPC: %s", err.Error())
-	}
+	result.Gpc, err = bs.ReadByteSize(1, err)
 
-	return result, nil
+	return result, err
 }
 
 func NewUSPNAT(encoded string) (USPNAT, error) {

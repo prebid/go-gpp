@@ -1,8 +1,6 @@
 package uspva
 
 import (
-	"fmt"
-
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/util"
 )
@@ -31,61 +29,19 @@ func initUSPVACoreSegment(bs *util.BitStream) (USPVACoreSegment, error) {
 	var result = USPVACoreSegment{}
 	var err error
 
-	result.Version, err = bs.ReadByte6()
-	if err != nil {
-		return result, fmt.Errorf("unable to set Version: %s", err.Error())
-	}
+	result.Version, err = bs.ReadByteSize(6, err)
+	result.SharingNotice, err = bs.ReadByteSize(2, err)
+	result.SaleOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.TargetedAdvertisingOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SaleOptOut, err = bs.ReadByteSize(2, err)
+	result.TargetedAdvertisingOptOut, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(8, err)
+	result.KnownChildSensitiveDataConsents, err = bs.ReadByteSize(2, err)
+	result.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
+	result.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
+	result.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
 
-	result.SharingNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingNotice: %s", err.Error())
-	}
-
-	result.SaleOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SaleOptOutNotice: %s", err.Error())
-	}
-
-	result.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set TargetedAdvertisingOptOutNotice: %s", err.Error())
-	}
-
-	result.SaleOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SaleOptOut: %s", err.Error())
-	}
-
-	result.TargetedAdvertisingOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set TargetedAdvertisingOptOut: %s", err.Error())
-	}
-
-	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(8)
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataProcessing: %s", err.Error())
-	}
-
-	result.KnownChildSensitiveDataConsents, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set KnownChildSensitiveDataConsents: %s", err.Error())
-	}
-	result.MspaCoveredTransaction, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaCoveredTransaction: %s", err.Error())
-	}
-
-	result.MspaOptOutOptionMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaOptOutOptionMode: %s", err.Error())
-	}
-
-	result.MspaServiceProviderMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaServiceProviderMode: %s", err.Error())
-	}
-
-	return result, nil
+	return result, err
 }
 
 func NewUSPVA(encoded string) (USPVA, error) {

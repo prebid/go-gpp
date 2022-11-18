@@ -1,8 +1,6 @@
 package uspca
 
 import (
-	"fmt"
-
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/util"
 )
@@ -37,79 +35,29 @@ func initUSPCACoreSegment(bs *util.BitStream) (USPCACoreSegment, error) {
 	var result = USPCACoreSegment{}
 	var err error
 
-	result.Version, err = bs.ReadByte6()
-	if err != nil {
-		return result, fmt.Errorf("unable to set Version: %s", err.Error())
-	}
+	result.Version, err = bs.ReadByteSize(6, err)
+	result.SalesOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SharingOptOutNotice, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataLimitUseNotice, err = bs.ReadByteSize(2, err)
+	result.SalesOptOut, err = bs.ReadByteSize(2, err)
+	result.SharingOptOut, err = bs.ReadByteSize(2, err)
+	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(9, err)
+	result.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2, err)
+	result.PersonalDataConsents, err = bs.ReadByteSize(2, err)
+	result.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
+	result.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
+	result.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
 
-	result.SalesOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SalesOptOutNotice: %s", err.Error())
-	}
-
-	result.SharingOptOutNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingOptOutNotice: %s", err.Error())
-	}
-
-	result.SensitiveDataLimitUseNotice, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataLimitUseNotice: %s", err.Error())
-	}
-
-	result.SalesOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SalesOptOut: %s", err.Error())
-	}
-
-	result.SharingOptOut, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set SharingOptOut: %s", err.Error())
-	}
-
-	result.SensitiveDataProcessing, err = bs.ReadTwoBitField(9)
-	if err != nil {
-		return result, fmt.Errorf("unable to set SensitiveDataProcessing: %s", err.Error())
-	}
-
-	result.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2)
-	if err != nil {
-		return result, fmt.Errorf("unable to set KnownChildSensitiveDataConsents: %s", err.Error())
-	}
-
-	result.PersonalDataConsents, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set PersonalDataConsents: %s", err.Error())
-	}
-
-	result.MspaCoveredTransaction, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaCoveredTransaction: %s", err.Error())
-	}
-
-	result.MspaOptOutOptionMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaOptOutOptionMode: %s", err.Error())
-	}
-
-	result.MspaServiceProviderMode, err = bs.ReadByte2()
-	if err != nil {
-		return result, fmt.Errorf("unable to set MspaServiceProviderMode: %s", err.Error())
-	}
-
-	return result, nil
+	return result, err
 }
 
 func initUSPCAGPCSegment(bs *util.BitStream) (USPCAGPCSegment, error) {
 	var result = USPCAGPCSegment{}
 	var err error
 
-	result.Gpc, err = bs.ReadByte1()
-	if err != nil {
-		return result, fmt.Errorf("unable to set GPC: %s", err.Error())
-	}
+	result.Gpc, err = bs.ReadByteSize(1, err)
 
-	return result, nil
+	return result, err
 }
 
 func NewUSPCA(encoded string) (USPCA, error) {

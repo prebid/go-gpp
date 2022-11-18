@@ -257,11 +257,14 @@ func ParseUInt16(data []byte, bitStartIndex uint16) (uint16, error) {
 	return binary.BigEndian.Uint16([]byte{leftByte, rightByte}), nil
 }
 
-func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
+func (bs *BitStream) ReadTwoBitField(numFields int, err error) ([]byte, error) {
 	result := []byte{}
+	if err != nil {
+		return result, err
+	}
 
 	if numFields == 0 {
-		return result, fmt.Errorf("attribute NumBitFields is 0")
+		return result, fmt.Errorf("numFields is 0")
 	}
 
 	maxFields := numFields * 2
@@ -274,4 +277,25 @@ func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
 	}
 
 	return result, nil
+}
+
+func (bs *BitStream) ReadByteSize(size int, err error) (byte, error) {
+	if err != nil {
+		return uint8(0), err
+	}
+
+	switch size {
+	case 1:
+		return bs.ReadByte1()
+	case 2:
+		return bs.ReadByte2()
+	case 4:
+		return bs.ReadByte4()
+	case 6:
+		return bs.ReadByte6()
+	case 8:
+		return bs.ReadByte8()
+	default:
+		return uint8(0), fmt.Errorf("unknown field size for reading bits: %d", size)
+	}
 }
