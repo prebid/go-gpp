@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/prebid/go-gpp/constants"
+	"github.com/prebid/go-gpp/sections"
 	"github.com/prebid/go-gpp/sections/uspca"
 	"github.com/prebid/go-gpp/sections/uspva"
 	"github.com/stretchr/testify/assert"
@@ -52,13 +53,13 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			description: "USPCA WIP",
+			description: "GPP string with USPCA",
 			gppString:   "DBABBgA~xlgWEYCY",
 			expected: GppContainer{
 				Version:      1,
 				SectionTypes: []constants.SectionID{8},
 				Sections: []Section{uspca.USPCA{
-					CoreSegment: uspca.USPCACoreSegment{
+					CoreSegment: sections.USPCACoreSegment{
 						Version:                     49,
 						SalesOptOutNotice:           2,
 						SharingOptOutNotice:         1,
@@ -76,7 +77,7 @@ func TestParse(t *testing.T) {
 						MspaOptOutOptionMode:    1,
 						MspaServiceProviderMode: 2,
 					},
-					GPCSegment: uspca.USPCAGPCSegment{
+					GPCSegment: sections.CommonUSGPCSegment{
 						Gpc: 0,
 					},
 					SectionID: 8,
@@ -85,13 +86,13 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			description: "USPVA WIP",
+			description: "GPP string with USPVA",
 			gppString:   "DBABRgA~bSFgmiU",
 			expected: GppContainer{
 				Version:      1,
 				SectionTypes: []constants.SectionID{9},
 				Sections: []Section{uspva.USPVA{
-					CoreSegment: uspva.USPVACoreSegment{
+					CoreSegment: sections.CommonUSCoreSegment{
 						Version:                         27,
 						SharingNotice:                   1,
 						SaleOptOutNotice:                0,
@@ -101,10 +102,11 @@ func TestParse(t *testing.T) {
 						SensitiveDataProcessing: []byte{
 							1, 2, 0, 0, 2, 1, 2, 2,
 						},
-						KnownChildSensitiveDataConsents: 0,
-						MspaCoveredTransaction:          2,
-						MspaOptOutOptionMode:            1,
-						MspaServiceProviderMode:         1,
+						KnownChildSensitiveDataConsentsInt: 0,
+						KnownChildSensitiveDataConsentsArr: []byte{},
+						MspaCoveredTransaction:             2,
+						MspaOptOutOptionMode:               1,
+						MspaServiceProviderMode:            1,
 					},
 					SectionID: 9,
 					Value:     "bSFgmiU"},

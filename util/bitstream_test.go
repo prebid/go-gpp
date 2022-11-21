@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -125,6 +126,52 @@ func TestReadByte6(t *testing.T) {
 				assert.Equal(t, test.err, err.Error())
 			}
 		})
+	}
+}
+
+type bitFieldTestDefinition struct {
+	data   []byte
+	fields int
+	value  []byte
+}
+
+var testTwoBitField = []bitFieldTestDefinition{
+	{testdata, 6, []byte{0, 0, 1, 0, 2, 2}},
+	{testdata, 8, []byte{0, 2, 0, 0, 0, 3, 2, 3}},
+	{testdata, 10, []byte{0, 1, 0, 0, 0, 0, 0, 2, 2, 3}},
+}
+
+func TestReadTwoBitField(t *testing.T) {
+	bs := NewBitStream(testdata)
+	var result []byte
+	var err error
+
+	result, err = bs.ReadTwoBitField(0, err)
+	assertStringsEqual(t, "numFields is 0", err.Error())
+	assertByteSlicesEqual(t, []byte{}, result)
+
+	// should contain the previous error and result should not be updated
+	result, err = bs.ReadTwoBitField(2, err)
+	assertStringsEqual(t, "numFields is 0", err.Error())
+	assertByteSlicesEqual(t, []byte{}, result)
+
+	// reset the error before running valid tests
+	err = nil
+	for _, test := range testTwoBitField {
+		result, err = bs.ReadTwoBitField(test.fields, err)
+		assertNilError(t, err)
+		assertByteSlicesEqual(t, test.value, result)
+	}
+
+	result, err = bs.ReadTwoBitField(2, err)
+	assertStringsEqual(t, "expected 2 bits to start at bit 48, but the byte array was only 6 bytes long", err.Error())
+	assertByteSlicesEqual(t, []byte{}, result)
+}
+
+func assertByteSlicesEqual(t *testing.T, expected []byte, actual []byte) {
+	t.Helper()
+	if !bytes.Equal(expected, actual) {
+		t.Errorf("Byte slices were not equal. Expected %v, actual %v", expected, actual)
 	}
 }
 

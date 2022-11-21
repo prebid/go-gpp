@@ -3,6 +3,8 @@ package uspnat
 import (
 	"testing"
 
+	"github.com/prebid/go-gpp/constants"
+	"github.com/prebid/go-gpp/sections"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,13 +17,13 @@ type uspnatTestData struct {
 func TestUSPNAT(t *testing.T) {
 	testData := []uspnatTestData{
 		{
-			description: "Test 1",
+			description: "should populate USPNAT segments correctly",
 			gppString:   "DSJgmkoZJSg",
 			/*
 				000011 01 00 10 00 10 01 10 00 00 100110100100101000011001 0010 01 01 00 10 1
 			*/
 			expected: USPNAT{
-				CoreSegment: USPNATCoreSegment{
+				CoreSegment: sections.USPNATCoreSegment{
 					Version:                             3,
 					SharingNotice:                       1,
 					SaleOptOutNotice:                    0,
@@ -43,10 +45,10 @@ func TestUSPNAT(t *testing.T) {
 					MspaOptOutOptionMode:    0,
 					MspaServiceProviderMode: 2,
 				},
-				GPCSegment: USPNATGPCSegment{
+				GPCSegment: sections.CommonUSGPCSegment{
 					Gpc: 1,
 				},
-				SectionID: 7,
+				SectionID: constants.SectionUSPNAT,
 				Value:     "DSJgmkoZJSg",
 			},
 		},
@@ -57,5 +59,7 @@ func TestUSPNAT(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
+		assert.Equal(t, constants.SectionUSPNAT, result.GetID())
+		assert.Equal(t, test.gppString, result.GetValue())
 	}
 }

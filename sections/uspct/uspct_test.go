@@ -1,4 +1,4 @@
-package uspva
+package uspct
 
 import (
 	"testing"
@@ -8,21 +8,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type uspvaTestData struct {
+type uspctTestData struct {
 	description string
 	gppString   string
-	expected    USPVA
+	expected    USPCT
 }
 
-func TestUSPVA(t *testing.T) {
-	testData := []uspvaTestData{
+func TestUSPCT(t *testing.T) {
+	testData := []uspctTestData{
 		{
-			description: "should populate USPVA segments correctly",
-			gppString:   "bSFgmiU",
+			description: "should populate USPCT segments correctly",
+			gppString:   "bSFgmSZQ",
 			/*
-				011011 01 00 10 00 01 0110000010011010 00 10 01 01
+				011011 01 00 10 00 01 0110000010011001 001001 10 01 01
 			*/
-			expected: USPVA{
+			expected: USPCT{
 				CoreSegment: sections.CommonUSCoreSegment{
 					Version:                         27,
 					SharingNotice:                   1,
@@ -31,26 +31,28 @@ func TestUSPVA(t *testing.T) {
 					SaleOptOut:                      0,
 					TargetedAdvertisingOptOut:       1,
 					SensitiveDataProcessing: []byte{
-						1, 2, 0, 0, 2, 1, 2, 2,
+						1, 2, 0, 0, 2, 1, 2, 1,
 					},
 					KnownChildSensitiveDataConsentsInt: 0,
-					KnownChildSensitiveDataConsentsArr: []byte{},
-					MspaCoveredTransaction:             2,
-					MspaOptOutOptionMode:               1,
-					MspaServiceProviderMode:            1,
+					KnownChildSensitiveDataConsentsArr: []byte{
+						0, 2, 1,
+					},
+					MspaCoveredTransaction:  2,
+					MspaOptOutOptionMode:    1,
+					MspaServiceProviderMode: 1,
 				},
-				SectionID: constants.SectionUSPVA,
-				Value:     "bSFgmiU",
+				SectionID: constants.SectionUSPCT,
+				Value:     "bSFgmSZQ",
 			},
 		},
 	}
 
 	for _, test := range testData {
-		result, err := NewUSPVA(test.gppString)
+		result, err := NewUSPCT(test.gppString)
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
-		assert.Equal(t, constants.SectionUSPVA, result.GetID())
+		assert.Equal(t, constants.SectionUSPCT, result.GetID())
 		assert.Equal(t, test.gppString, result.GetValue())
 	}
 }
