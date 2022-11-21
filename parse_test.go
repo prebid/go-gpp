@@ -59,7 +59,7 @@ func TestParse(t *testing.T) {
 				Version:      1,
 				SectionTypes: []constants.SectionID{8},
 				Sections: []Section{uspca.USPCA{
-					CoreSegment: uspca.USPCACoreSegment{
+					CoreSegment: sections.USPCACoreSegment{
 						Version:                     49,
 						SaleOptOutNotice:            2,
 						SharingOptOutNotice:         1,
