@@ -57,7 +57,7 @@ type IRange struct {
 
 // IsSet checks to see if an ID is contained within a range set
 func (ir *IntRange) IsSet(id uint16) bool {
-	if id < 0 || id > ir.Max {
+	if id > ir.Max {
 		return false
 	}
 

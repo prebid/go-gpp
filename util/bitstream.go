@@ -11,7 +11,7 @@ type BitStream struct {
 	b []byte
 }
 
-// NewBitStream creates a new butstream object
+// NewBitStream creates a new bitstream object
 func NewBitStream(b []byte) *BitStream {
 	return &BitStream{p: 0, b: b}
 }
@@ -43,7 +43,7 @@ func (bs *BitStream) Len() uint16 {
 	return uint16(len(bs.b))
 }
 
-// ReadByte1 reads 1 bit fron the bitstream, advancing the pointer
+// ReadByte1 reads 1 bit from the bitstream, advancing the pointer
 func (bs *BitStream) ReadByte1() (byte, error) {
 	b, err := ParseByte1(bs.b, bs.p)
 	if err == nil {
@@ -64,7 +64,7 @@ func ParseByte1(data []byte, bitStartIndex uint16) (byte, error) {
 	return (data[startByte] & (0x80 >> bitOffset)) >> (7 - bitOffset), nil
 }
 
-// ReadByte4 reads 4 bits fron the bitstream, advancing the pointer
+// ReadByte4 reads 4 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadByte4() (byte, error) {
 	b, err := ParseByte4(bs.b, bs.p)
 	if err == nil {
@@ -95,7 +95,7 @@ func ParseByte4(data []byte, bitStartIndex uint16) (byte, error) {
 	return leftBits | rightBits, nil
 }
 
-// ReadByte6 reads 6 bits fron the bitstream, advancing the pointer
+// ReadByte6 reads 6 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadByte6() (byte, error) {
 	b, err := ParseByte6(bs.b, bs.p)
 	if err == nil {
@@ -122,12 +122,12 @@ func ParseByte6(data []byte, bitStartIndex uint16) (byte, error) {
 	leftBits := (data[startByte] & (0xfc >> bitStartOffset)) << (bitStartOffset - 2)
 	bitsConsumed := 8 - bitStartOffset
 	overflow := 6 - bitsConsumed
-	// If the overflow is negative, rightBits get shifted out of existance.
+	// If the overflow is negative, rightBits get shifted out of existence.
 	rightBits := (data[startByte+1] & (0xfc << (6 - overflow))) >> (8 - overflow)
 	return leftBits | rightBits, nil
 }
 
-// ReadByte8 reads 8 bits fron the bitstream, advancing the pointer
+// ReadByte8 reads 8 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadByte8() (byte, error) {
 	b, err := ParseByte8(bs.b, bs.p)
 	if err == nil {
@@ -157,7 +157,7 @@ func ParseByte8(data []byte, bitStartIndex uint16) (byte, error) {
 	return leftBits | rightBits, nil
 }
 
-// ReadUInt12 reads 12 bits fron the bitstream, advancing the pointer
+// ReadUInt12 reads 12 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadUInt12() (uint16, error) {
 	i, err := ParseUInt12(bs.b, bs.p)
 	if err == nil {
@@ -167,7 +167,7 @@ func (bs *BitStream) ReadUInt12() (uint16, error) {
 	return 0, err
 }
 
-// ParseUInt12 parses 12 bits of data fromt the data array, starting at the given index
+// ParseUInt12 parses 12 bits of data from the data array, starting at the given index
 func ParseUInt12(data []byte, bitStartIndex uint16) (uint16, error) {
 	end := bitStartIndex + 12
 	endByte := end / 8
@@ -192,7 +192,7 @@ func ParseUInt12(data []byte, bitStartIndex uint16) (uint16, error) {
 	return binary.BigEndian.Uint16([]byte{leftByte, rightByte}), nil
 }
 
-// ReadUInt16 reads 16 bits fron the bitstream, advancing the pointer
+// ReadUInt16 reads 16 bits from the bitstream, advancing the pointer
 func (bs *BitStream) ReadUInt16() (uint16, error) {
 	i, err := ParseUInt16(bs.b, bs.p)
 	if err == nil {
