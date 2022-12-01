@@ -143,7 +143,7 @@ func ParseByte6(data []byte, bitStartIndex uint16) (byte, error) {
 		if uint16(len(data)) < (startByte + 1) {
 			return 0, fmt.Errorf("expected 6 bits to start at bit %d, but the byte array was only %d bytes long", bitStartIndex, len(data))
 		}
-		return (data[startByte] & (0xfc >> bitStartOffset)) >> (2 - bitStartOffset), nil
+		return data[startByte] >> (2 - bitStartIndex), nil
 	}
 	if uint16(len(data)) < (startByte + 2) {
 		return 0, fmt.Errorf("expected 6 bits to start at bit %d, but the byte array was only %d bytes long (needs second byte)", bitStartIndex, len(data))
@@ -273,25 +273,4 @@ func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
 	}
 
 	return result, nil
-}
-
-func (bs *BitStream) ReadByteSize(size int, err error) (byte, error) {
-	if err != nil {
-		return uint8(0), err
-	}
-
-	switch size {
-	case 1:
-		return bs.ReadByte1()
-	case 2:
-		return bs.ReadByte2()
-	case 4:
-		return bs.ReadByte4()
-	case 6:
-		return bs.ReadByte6()
-	case 8:
-		return bs.ReadByte8()
-	default:
-		return uint8(0), fmt.Errorf("unknown field size for reading bits: %d", size)
-	}
 }
