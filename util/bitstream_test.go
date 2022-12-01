@@ -146,24 +146,17 @@ func TestReadTwoBitField(t *testing.T) {
 	var result []byte
 	var err error
 
-	result, err = bs.ReadTwoBitField(0, err)
-	assertStringsEqual(t, "numFields is 0", err.Error())
+	result, err = bs.ReadTwoBitField(0)
+	assertStringsEqual(t, "numFields is invalid", err.Error())
 	assertByteSlicesEqual(t, []byte{}, result)
 
-	// should contain the previous error and result should not be updated
-	result, err = bs.ReadTwoBitField(2, err)
-	assertStringsEqual(t, "numFields is 0", err.Error())
-	assertByteSlicesEqual(t, []byte{}, result)
-
-	// reset the error before running valid tests
-	err = nil
 	for _, test := range testTwoBitField {
-		result, err = bs.ReadTwoBitField(test.fields, err)
+		result, err = bs.ReadTwoBitField(test.fields)
 		assertNilError(t, err)
 		assertByteSlicesEqual(t, test.value, result)
 	}
 
-	result, err = bs.ReadTwoBitField(2, err)
+	result, err = bs.ReadTwoBitField(2)
 	assertStringsEqual(t, "expected 2 bits to start at bit 48, but the byte array was only 6 bytes long", err.Error())
 	assertByteSlicesEqual(t, []byte{}, result)
 }

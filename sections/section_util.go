@@ -1,6 +1,8 @@
 package sections
 
 import (
+	"fmt"
+
 	"github.com/prebid/go-gpp/util"
 )
 
@@ -72,57 +74,155 @@ type USPNATCoreSegment struct {
 	MspaServiceProviderMode             byte
 }
 
+func errorHelper(name string, err error) error {
+	return fmt.Errorf("unable to set field %s due to parse error: %s", name, err.Error())
+}
+
 func NewCommonUSCoreSegment(sensitiveDataFields int, knownChildDataFields int, bs *util.BitStream) (CommonUSCoreSegment, error) {
 	var commonUSCore CommonUSCoreSegment
 	var err error
 
-	commonUSCore.Version, err = bs.ReadByteSize(6, err)
-	commonUSCore.SharingNotice, err = bs.ReadByteSize(2, err)
-	commonUSCore.SaleOptOutNotice, err = bs.ReadByteSize(2, err)
-	commonUSCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByteSize(2, err)
-	commonUSCore.SaleOptOut, err = bs.ReadByteSize(2, err)
-	commonUSCore.TargetedAdvertisingOptOut, err = bs.ReadByteSize(2, err)
-	commonUSCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(sensitiveDataFields, err)
-
-	if knownChildDataFields > 0 {
-		commonUSCore.KnownChildSensitiveDataConsentsArr, err = bs.ReadTwoBitField(knownChildDataFields, err)
-	} else {
-		commonUSCore.KnownChildSensitiveDataConsentsInt, err = bs.ReadByteSize(2, err)
-		commonUSCore.KnownChildSensitiveDataConsentsArr = []byte{}
+	commonUSCore.Version, err = bs.ReadByte6()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.Version", err)
 	}
 
-	commonUSCore.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
-	commonUSCore.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
-	commonUSCore.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
+	commonUSCore.SharingNotice, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.SharingNotice", err)
+	}
 
-	return commonUSCore, err
+	commonUSCore.SaleOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.SaleOptOutNotice", err)
+	}
+
+	commonUSCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.TargetedAdvertisingOptOutNotice", err)
+	}
+
+	commonUSCore.SaleOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.SaleOptOut", err)
+	}
+
+	commonUSCore.TargetedAdvertisingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.TargetedAdvertisingOptOut", err)
+	}
+
+	commonUSCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(sensitiveDataFields)
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.SensitiveDataProcessing", err)
+	}
+
+	if knownChildDataFields > 0 {
+		commonUSCore.KnownChildSensitiveDataConsentsArr, err = bs.ReadTwoBitField(knownChildDataFields)
+		if err != nil {
+			return commonUSCore, errorHelper("CoreSegment.KnownChildSensitiveDataConsentsArr", err)
+		}
+	} else {
+		commonUSCore.KnownChildSensitiveDataConsentsInt, err = bs.ReadByte2()
+		commonUSCore.KnownChildSensitiveDataConsentsArr = []byte{}
+		if err != nil {
+			return commonUSCore, errorHelper("CoreSegment.KnownChildSensitiveDataConsentsInt", err)
+		}
+	}
+
+	commonUSCore.MspaCoveredTransaction, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.MspaCoveredTransaction", err)
+	}
+
+	commonUSCore.MspaOptOutOptionMode, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.MspaOptOutOptionMode", err)
+	}
+
+	commonUSCore.MspaServiceProviderMode, err = bs.ReadByte2()
+	if err != nil {
+		return commonUSCore, errorHelper("CoreSegment.MspaServiceProviderMode", err)
+	}
+
+	return commonUSCore, nil
 }
 
 func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	var commonUSGPC CommonUSGPCSegment
 	var err error
 
-	commonUSGPC.Gpc, err = bs.ReadByteSize(1, err)
+	commonUSGPC.Gpc, err = bs.ReadByte1()
+	if err != nil {
+		return commonUSGPC, errorHelper("GPCSegment.Gpc", err)
+	}
 
-	return commonUSGPC, err
+	return commonUSGPC, nil
 }
 
 func NewUSPCACoreSegment(bs *util.BitStream) (USPCACoreSegment, error) {
 	var uspcaCore USPCACoreSegment
 	var err error
 
-	uspcaCore.Version, err = bs.ReadByteSize(6, err)
-	uspcaCore.SalesOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspcaCore.SharingOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspcaCore.SensitiveDataLimitUseNotice, err = bs.ReadByteSize(2, err)
-	uspcaCore.SalesOptOut, err = bs.ReadByteSize(2, err)
-	uspcaCore.SharingOptOut, err = bs.ReadByteSize(2, err)
-	uspcaCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(9, err)
-	uspcaCore.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2, err)
-	uspcaCore.PersonalDataConsents, err = bs.ReadByteSize(2, err)
-	uspcaCore.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
-	uspcaCore.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
-	uspcaCore.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
+	uspcaCore.Version, err = bs.ReadByte6()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.Version", err)
+	}
+
+	uspcaCore.SalesOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.SalesOptOutNotice", err)
+	}
+
+	uspcaCore.SharingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.SharingOptOutNotice", err)
+	}
+
+	uspcaCore.SensitiveDataLimitUseNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.Version", err)
+	}
+
+	uspcaCore.SalesOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.SalesOptOut", err)
+	}
+
+	uspcaCore.SharingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.SharingOptOut", err)
+	}
+
+	uspcaCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(9)
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.SensitiveDataProcessing", err)
+	}
+
+	uspcaCore.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2)
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.KnownChildSensitiveDataConsents", err)
+	}
+
+	uspcaCore.PersonalDataConsents, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.PersonalDataConsents", err)
+	}
+
+	uspcaCore.MspaCoveredTransaction, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.MspaCoveredTransaction", err)
+	}
+
+	uspcaCore.MspaOptOutOptionMode, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.MspaOptOutOptionMode", err)
+	}
+
+	uspcaCore.MspaServiceProviderMode, err = bs.ReadByte2()
+	if err != nil {
+		return uspcaCore, errorHelper("CoreSegment.MspaServiceProviderMode", err)
+	}
 
 	return uspcaCore, err
 }
@@ -131,42 +231,152 @@ func NewUSPNATCoreSegment(bs *util.BitStream) (USPNATCoreSegment, error) {
 	var uspnatCore USPNATCoreSegment
 	var err error
 
-	uspnatCore.Version, err = bs.ReadByteSize(6, err)
-	uspnatCore.SharingNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.SaleOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.SharingOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.SensitiveDataProcessingOptOutNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.SensitiveDataLimitUseNotice, err = bs.ReadByteSize(2, err)
-	uspnatCore.SaleOptOut, err = bs.ReadByteSize(2, err)
-	uspnatCore.SharingOptOut, err = bs.ReadByteSize(2, err)
-	uspnatCore.TargetedAdvertisingOptOut, err = bs.ReadByteSize(2, err)
-	uspnatCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(12, err)
-	uspnatCore.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2, err)
-	uspnatCore.PersonalDataConsents, err = bs.ReadByteSize(2, err)
-	uspnatCore.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
-	uspnatCore.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
-	uspnatCore.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
+	uspnatCore.Version, err = bs.ReadByte6()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.Version", err)
+	}
 
-	return uspnatCore, err
+	uspnatCore.SharingNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SharingNotice", err)
+	}
+
+	uspnatCore.SaleOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SaleOptOutNotice", err)
+	}
+
+	uspnatCore.SharingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SharingOptOutNotice", err)
+	}
+
+	uspnatCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.TargetedAdvertisingOptOutNotice", err)
+	}
+
+	uspnatCore.SensitiveDataProcessingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SensitiveDataProcessingOptOutNotice", err)
+	}
+
+	uspnatCore.SensitiveDataLimitUseNotice, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SensitiveDataLimitUseNotice", err)
+	}
+
+	uspnatCore.SaleOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SaleOptOut", err)
+	}
+
+	uspnatCore.SharingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SharingOptOut", err)
+	}
+
+	uspnatCore.TargetedAdvertisingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.TargetedAdvertisingOptOut", err)
+	}
+
+	uspnatCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(12)
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.SensitiveDataProcessing", err)
+	}
+
+	uspnatCore.KnownChildSensitiveDataConsents, err = bs.ReadTwoBitField(2)
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.KnownChildSensitiveDataConsents", err)
+	}
+
+	uspnatCore.PersonalDataConsents, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.PersonalDataConsents", err)
+	}
+
+	uspnatCore.MspaCoveredTransaction, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.MspaCoveredTransaction", err)
+	}
+
+	uspnatCore.MspaOptOutOptionMode, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.MspaOptOutOptionMode", err)
+	}
+
+	uspnatCore.MspaServiceProviderMode, err = bs.ReadByte2()
+	if err != nil {
+		return uspnatCore, errorHelper("CoreSegment.MspaServiceProviderMode", err)
+	}
+
+	return uspnatCore, nil
 }
 
 func NewUPSUTCoreSegment(bs *util.BitStream) (USPUTCoreSegment, error) {
 	var usputCore USPUTCoreSegment
 	var err error
 
-	usputCore.Version, err = bs.ReadByteSize(6, err)
-	usputCore.SharingNotice, err = bs.ReadByteSize(2, err)
-	usputCore.SaleOptOutNotice, err = bs.ReadByteSize(2, err)
-	usputCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByteSize(2, err)
-	usputCore.SensitiveDataProcessingOptOutNotice, err = bs.ReadByteSize(2, err)
-	usputCore.SaleOptOut, err = bs.ReadByteSize(2, err)
-	usputCore.TargetedAdvertisingOptOut, err = bs.ReadByteSize(2, err)
-	usputCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(8, err)
-	usputCore.KnownChildSensitiveDataConsents, err = bs.ReadByteSize(2, err)
-	usputCore.MspaCoveredTransaction, err = bs.ReadByteSize(2, err)
-	usputCore.MspaOptOutOptionMode, err = bs.ReadByteSize(2, err)
-	usputCore.MspaServiceProviderMode, err = bs.ReadByteSize(2, err)
+	usputCore.Version, err = bs.ReadByte6()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.Version", err)
+	}
 
-	return usputCore, err
+	usputCore.SharingNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.SharingNotice", err)
+	}
+
+	usputCore.SaleOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.SaleOptOutNotice", err)
+	}
+
+	usputCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.TargetedAdvertisingOptOutNotice", err)
+	}
+
+	usputCore.SensitiveDataProcessingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.SensitiveDataProcessingOptOutNotice", err)
+	}
+
+	usputCore.SaleOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.SaleOptOut", err)
+	}
+
+	usputCore.TargetedAdvertisingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.TargetedAdvertisingOptOut", err)
+	}
+
+	usputCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(8)
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.SensitiveDataProcessing", err)
+	}
+
+	usputCore.KnownChildSensitiveDataConsents, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.KnownChildSensitiveDataConsents", err)
+	}
+
+	usputCore.MspaCoveredTransaction, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.MspaCoveredTransaction", err)
+	}
+
+	usputCore.MspaOptOutOptionMode, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.MspaOptOutOptionMode", err)
+	}
+
+	usputCore.MspaServiceProviderMode, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, errorHelper("CoreSegment.MspaServiceProviderMode", err)
+	}
+
+	return usputCore, nil
 }

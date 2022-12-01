@@ -6,7 +6,10 @@ import (
 
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/sections/uspca"
+	"github.com/prebid/go-gpp/sections/uspco"
+	"github.com/prebid/go-gpp/sections/uspct"
 	"github.com/prebid/go-gpp/sections/uspnat"
+	"github.com/prebid/go-gpp/sections/usput"
 	"github.com/prebid/go-gpp/sections/uspva"
 	"github.com/prebid/go-gpp/util"
 )
@@ -83,6 +86,12 @@ func Parse(v string) (GppContainer, error) {
 			sections[i], err = uspca.NewUSPCA(sectionStrings[i+1])
 		case constants.SectionUSPVA:
 			sections[i], err = uspva.NewUSPVA(sectionStrings[i+1])
+		case constants.SectionUSPCO:
+			sections[i], err = uspco.NewUSPCO(sectionStrings[i+1])
+		case constants.SectionUSPUT:
+			sections[i], err = usput.NewUSPUT(sectionStrings[i+1])
+		case constants.SectionUSPCT:
+			sections[i], err = uspct.NewUSPCT(sectionStrings[i+1])
 		default:
 			sections[i] = GenericSection{sectionID: id, value: sectionStrings[i+1]}
 		}
