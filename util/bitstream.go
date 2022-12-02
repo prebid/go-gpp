@@ -258,14 +258,13 @@ func ParseUInt16(data []byte, bitStartIndex uint16) (uint16, error) {
 }
 
 func (bs *BitStream) ReadTwoBitField(numFields int) ([]byte, error) {
-	result := []byte{}
-
 	if numFields <= 0 {
-		return result, fmt.Errorf("numFields is invalid")
+		return []byte{}, fmt.Errorf("numFields is invalid")
 	}
 
-	maxFields := numFields * 2
-	for i := 0; i < maxFields; i += 2 {
+	result := make([]byte, 0, numFields)
+
+	for i := 0; i < numFields; i++ {
 		val, err := bs.ReadByte2()
 		if err != nil {
 			return result, err
