@@ -18,12 +18,12 @@ func TestUSPNAT(t *testing.T) {
 	testData := []uspnatTestData{
 		{
 			description: "should populate USPNAT segments correctly",
-			gppString:   "DSJgmkoZJSg",
+			gppString:   "DSJgmkoZJSY",
 			/*
-				000011 01 00 10 00 10 01 10 00 00 100110100100101000011001 0010 01 01 00 10 1
+				000011 01 00 10 00 10 01 10 00 00 100110100100101000011001 0010 01 01 00 10 01 1
 			*/
 			expected: USPNAT{
-				CoreSegment: sections.USPNATCoreSegment{
+				CoreSegment: USPNATCoreSegment{
 					Version:                             3,
 					SharingNotice:                       1,
 					SaleOptOutNotice:                    0,
@@ -46,10 +46,11 @@ func TestUSPNAT(t *testing.T) {
 					MspaServiceProviderMode: 2,
 				},
 				GPCSegment: sections.CommonUSGPCSegment{
-					Gpc: 1,
+					SubsectionType: 1,
+					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPNAT,
-				Value:     "DSJgmkoZJSg",
+				Value:     "DSJgmkoZJSY",
 			},
 		},
 	}

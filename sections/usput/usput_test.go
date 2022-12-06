@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/prebid/go-gpp/constants"
-	"github.com/prebid/go-gpp/sections"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +22,7 @@ func TestUSPUT(t *testing.T) {
 				011011 01 00 10 01 00 01 0110000010011001 01 10 01 01
 			*/
 			expected: USPUT{
-				CoreSegment: sections.USPUTCoreSegment{
+				CoreSegment: USPUTCoreSegment{
 					Version:                             27,
 					SharingNotice:                       1,
 					SaleOptOutNotice:                    0,

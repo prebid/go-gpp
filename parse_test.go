@@ -54,17 +54,17 @@ func TestParse(t *testing.T) {
 		},
 		{
 			description: "GPP string with USPCA",
-			gppString:   "DBABBgA~xlgWEYCY",
+			gppString:   "DBABBgA~xlgWEYCZAA",
 			expected: GppContainer{
 				Version:      1,
 				SectionTypes: []constants.SectionID{8},
 				Sections: []Section{uspca.USPCA{
-					CoreSegment: sections.USPCACoreSegment{
+					CoreSegment: uspca.USPCACoreSegment{
 						Version:                     49,
-						SalesOptOutNotice:           2,
+						SaleOptOutNotice:            2,
 						SharingOptOutNotice:         1,
 						SensitiveDataLimitUseNotice: 1,
-						SalesOptOut:                 2,
+						SaleOptOut:                  2,
 						SharingOptOut:               0,
 						SensitiveDataProcessing: []byte{
 							0, 1, 1, 2, 0, 1, 0, 1, 2,
@@ -78,10 +78,11 @@ func TestParse(t *testing.T) {
 						MspaServiceProviderMode: 2,
 					},
 					GPCSegment: sections.CommonUSGPCSegment{
-						Gpc: 0,
+						SubsectionType: 1,
+						Gpc:            false,
 					},
 					SectionID: 8,
-					Value:     "xlgWEYCY"},
+					Value:     "xlgWEYCZAA"},
 				},
 			},
 		},
@@ -102,11 +103,10 @@ func TestParse(t *testing.T) {
 						SensitiveDataProcessing: []byte{
 							1, 2, 0, 0, 2, 1, 2, 2,
 						},
-						KnownChildSensitiveDataConsentsInt: 0,
-						KnownChildSensitiveDataConsentsArr: []byte{},
-						MspaCoveredTransaction:             2,
-						MspaOptOutOptionMode:               1,
-						MspaServiceProviderMode:            1,
+						KnownChildSensitiveDataConsents: []byte{0},
+						MspaCoveredTransaction:          2,
+						MspaOptOutOptionMode:            1,
+						MspaServiceProviderMode:         1,
 					},
 					SectionID: 9,
 					Value:     "bSFgmiU"},

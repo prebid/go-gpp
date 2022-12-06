@@ -10,6 +10,7 @@ type USPCT struct {
 	SectionID   constants.SectionID
 	Value       string
 	CoreSegment sections.CommonUSCoreSegment
+	GPCSegment  sections.CommonUSGPCSegment
 }
 
 func NewUSPCT(encoded string) (USPCT, error) {
@@ -25,10 +26,16 @@ func NewUSPCT(encoded string) (USPCT, error) {
 		return uspct, err
 	}
 
+	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
+	if err != nil {
+		return uspct, err
+	}
+
 	uspct = USPCT{
 		SectionID:   constants.SectionUSPCT,
 		Value:       encoded,
 		CoreSegment: coreSegment,
+		GPCSegment:  gpcSegment,
 	}
 
 	return uspct, nil

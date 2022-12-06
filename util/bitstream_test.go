@@ -1,7 +1,6 @@
 package util
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,26 +44,31 @@ func TestReadByte1(t *testing.T) {
 
 }
 
-var test2Bits = []testDefinition{
-	{testdata, 31, 2}, // testdata duplicate of Offset which involves flowing over to a second byte
-	{testdata, 23, 3}, // testdata duplicate of Offset which involves flowing over to a second byte
-	{testdata, 9, 1},  // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
-	{testdata, 10, 2}, // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
-	{testdata, 44, 2}, // testdata duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
-	{testdata, 0, 0},  // No offset
-}
-
 func TestParseByte2(t *testing.T) {
-	b, err := ParseByte2(testdata, 47)
-	assertStringsEqual(t, "expected 2 bits to start at bit 47, but the byte array was only 6 bytes long", err.Error())
+	testSet := map[string]testDefinition{
+		"Bits overrun": {testData, 47, 0,
+			"expected 2 bits to start at bit 47, but the byte array was only 6 bytes long"},
+		"Bits out of bounds": {testData, 80, 0,
+			"expected 2 bits to start at bit 80, but the byte array was only 6 bytes long"},
+		"Spans 2 bytes":    {testData, 31, 2, ""}, // testData duplicate of Offset which involves flowing over to a second byte
+		"Spans 2 bytes 2":  {testData, 23, 3, ""}, // testData duplicate of Offset which involves flowing over to a second byte
+		"nibble aligned":   {testData, 9, 1, ""},  // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"nibble aligned 2": {testData, 10, 2, ""}, // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"nibble aligned 3": {testData, 44, 2, ""}, // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"No offset":        {testData, 0, 0, ""},  // No offset
+	}
 
-	b, err = ParseByte2(testdata, 80)
-	assertStringsEqual(t, "expected 2 bits to start at bit 80, but the byte array was only 6 bytes long", err.Error())
-
-	for _, test := range test2Bits {
-		b, err = ParseByte2(test.data, test.offset)
-		assertNilError(t, err)
-		assertBytesEqual(t, byte(test.value), b)
+	for name, test := range testSet {
+		t.Run(name, func(t *testing.T) {
+			bs := BitStream{b: test.data, p: test.offset}
+			b, err := bs.ReadByte2()
+			if test.err == "" {
+				assert.Nil(t, err, "Found unexpected error: %s", err)
+				assert.Equal(t, byte(test.value), b)
+			} else {
+				assert.Equal(t, test.err, err.Error())
+			}
+		})
 	}
 }
 
@@ -130,41 +134,33 @@ func TestReadByte6(t *testing.T) {
 }
 
 type bitFieldTestDefinition struct {
-	data   []byte
-	fields int
-	value  []byte
-}
-
-var testTwoBitField = []bitFieldTestDefinition{
-	{testdata, 6, []byte{0, 0, 1, 0, 2, 2}},
-	{testdata, 8, []byte{0, 2, 0, 0, 0, 3, 2, 3}},
-	{testdata, 10, []byte{0, 1, 0, 0, 0, 0, 0, 2, 2, 3}},
+	data   []byte // The data to feed the function
+	offset uint16 // The bit offset in the byte slice to start
+	fields int    // The number of 2-bit fields to read
+	value  []byte // The expected return value
+	err    string // Expected error value
 }
 
 func TestReadTwoBitField(t *testing.T) {
-	bs := NewBitStream(testdata)
-	var result []byte
-	var err error
-
-	result, err = bs.ReadTwoBitField(0)
-	assertStringsEqual(t, "numFields is invalid", err.Error())
-	assertByteSlicesEqual(t, []byte{}, result)
-
-	for _, test := range testTwoBitField {
-		result, err = bs.ReadTwoBitField(test.fields)
-		assertNilError(t, err)
-		assertByteSlicesEqual(t, test.value, result)
+	testSet := map[string]bitFieldTestDefinition{
+		"Read 6 bitfields":                          {testData, 0, 6, []byte{0, 0, 1, 0, 2, 2}, ""},
+		"Read 8 bitfields":                          {testData, 12, 8, []byte{0, 2, 0, 0, 0, 3, 2, 3}, ""},
+		"Read 10 bitfields":                         {testData, 28, 10, []byte{0, 1, 0, 0, 0, 0, 0, 2, 2, 3}, ""},
+		"Error reading end of bitstream":            {testData, 48, 2, []byte{}, "expected 2 bits to start at bit 48, but the byte array was only 6 bytes long"},
+		"Error passing in invalid number of fields": {testData, 0, -2, []byte{}, "numFields is invalid"},
 	}
 
-	result, err = bs.ReadTwoBitField(2)
-	assertStringsEqual(t, "expected 2 bits to start at bit 48, but the byte array was only 6 bytes long", err.Error())
-	assertByteSlicesEqual(t, []byte{}, result)
-}
-
-func assertByteSlicesEqual(t *testing.T, expected []byte, actual []byte) {
-	t.Helper()
-	if !bytes.Equal(expected, actual) {
-		t.Errorf("Byte slices were not equal. Expected %v, actual %v", expected, actual)
+	for name, test := range testSet {
+		t.Run(name, func(t *testing.T) {
+			bs := BitStream{b: test.data, p: test.offset}
+			b, err := bs.ReadTwoBitField(test.fields)
+			if test.err == "" {
+				assert.Nil(t, err, "Found unexpected error: %s", err)
+				assert.Equal(t, test.value, b)
+			} else {
+				assert.Equal(t, test.err, err.Error())
+			}
+		})
 	}
 }
 

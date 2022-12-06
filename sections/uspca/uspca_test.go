@@ -18,17 +18,17 @@ func TestUSPCA(t *testing.T) {
 	testData := []uspcaTestData{
 		{
 			description: "should populate USPCA segments correctly",
-			gppString:   "xlgWEYCY",
+			gppString:   "xlgWEYCZAA",
 			/*
-				110001 10 01 01 10 00 000101100001000110 0000 00 10 01 10
+				110001 10 01 01 10 00 000101100001000110 0000 00 10 01 10 01 0
 			*/
 			expected: USPCA{
-				CoreSegment: sections.USPCACoreSegment{
+				CoreSegment: USPCACoreSegment{
 					Version:                     49,
-					SalesOptOutNotice:           2,
+					SaleOptOutNotice:            2,
 					SharingOptOutNotice:         1,
 					SensitiveDataLimitUseNotice: 1,
-					SalesOptOut:                 2,
+					SaleOptOut:                  2,
 					SharingOptOut:               0,
 					SensitiveDataProcessing: []byte{
 						0, 1, 1, 2, 0, 1, 0, 1, 2,
@@ -42,10 +42,11 @@ func TestUSPCA(t *testing.T) {
 					MspaServiceProviderMode: 2,
 				},
 				GPCSegment: sections.CommonUSGPCSegment{
-					Gpc: 0,
+					SubsectionType: 1,
+					Gpc:            false,
 				},
 				SectionID: constants.SectionUSPCA,
-				Value:     "xlgWEYCY",
+				Value:     "xlgWEYCZAA",
 			},
 		},
 	}

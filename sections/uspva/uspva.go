@@ -20,7 +20,7 @@ func NewUSPVA(encoded string) (USPVA, error) {
 		return uspva, err
 	}
 
-	coreSegment, err := sections.NewCommonUSCoreSegment(8, 0, bitStream)
+	coreSegment, err := sections.NewCommonUSCoreSegment(8, 1, bitStream)
 	if err != nil {
 		return uspva, err
 	}

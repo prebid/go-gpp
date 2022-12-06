@@ -10,6 +10,7 @@ type USPCO struct {
 	SectionID   constants.SectionID
 	Value       string
 	CoreSegment sections.CommonUSCoreSegment
+	GPCSegment  sections.CommonUSGPCSegment
 }
 
 func NewUSPCO(encoded string) (USPCO, error) {
@@ -20,7 +21,12 @@ func NewUSPCO(encoded string) (USPCO, error) {
 		return uspco, err
 	}
 
-	coreSegment, err := sections.NewCommonUSCoreSegment(7, 0, bitStream)
+	coreSegment, err := sections.NewCommonUSCoreSegment(7, 1, bitStream)
+	if err != nil {
+		return uspco, err
+	}
+
+	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
 	if err != nil {
 		return uspco, err
 	}
@@ -29,6 +35,7 @@ func NewUSPCO(encoded string) (USPCO, error) {
 		SectionID:   constants.SectionUSPCO,
 		Value:       encoded,
 		CoreSegment: coreSegment,
+		GPCSegment:  gpcSegment,
 	}
 
 	return uspco, nil

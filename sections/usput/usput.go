@@ -6,10 +6,92 @@ import (
 	"github.com/prebid/go-gpp/util"
 )
 
+type USPUTCoreSegment struct {
+	Version                             byte
+	SharingNotice                       byte
+	SaleOptOutNotice                    byte
+	TargetedAdvertisingOptOutNotice     byte
+	SensitiveDataProcessingOptOutNotice byte
+	SaleOptOut                          byte
+	TargetedAdvertisingOptOut           byte
+	SensitiveDataProcessing             []byte
+	KnownChildSensitiveDataConsents     byte
+	MspaCoveredTransaction              byte
+	MspaOptOutOptionMode                byte
+	MspaServiceProviderMode             byte
+}
+
 type USPUT struct {
 	SectionID   constants.SectionID
 	Value       string
-	CoreSegment sections.USPUTCoreSegment
+	CoreSegment USPUTCoreSegment
+}
+
+func NewUPSUTCoreSegment(bs *util.BitStream) (USPUTCoreSegment, error) {
+	var usputCore USPUTCoreSegment
+	var err error
+
+	usputCore.Version, err = bs.ReadByte6()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.Version", err)
+	}
+
+	usputCore.SharingNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.SharingNotice", err)
+	}
+
+	usputCore.SaleOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.SaleOptOutNotice", err)
+	}
+
+	usputCore.TargetedAdvertisingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.TargetedAdvertisingOptOutNotice", err)
+	}
+
+	usputCore.SensitiveDataProcessingOptOutNotice, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.SensitiveDataProcessingOptOutNotice", err)
+	}
+
+	usputCore.SaleOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.SaleOptOut", err)
+	}
+
+	usputCore.TargetedAdvertisingOptOut, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.TargetedAdvertisingOptOut", err)
+	}
+
+	usputCore.SensitiveDataProcessing, err = bs.ReadTwoBitField(8)
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.SensitiveDataProcessing", err)
+	}
+
+	usputCore.KnownChildSensitiveDataConsents, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.KnownChildSensitiveDataConsents", err)
+	}
+
+	usputCore.MspaCoveredTransaction, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.MspaCoveredTransaction", err)
+	}
+
+	usputCore.MspaOptOutOptionMode, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.MspaOptOutOptionMode", err)
+	}
+
+	usputCore.MspaServiceProviderMode, err = bs.ReadByte2()
+	if err != nil {
+		return usputCore, sections.ErrorHelper("CoreSegment.MspaServiceProviderMode", err)
+	}
+
+	return usputCore, nil
 }
 
 func NewUSPUT(encoded string) (USPUT, error) {
@@ -20,7 +102,7 @@ func NewUSPUT(encoded string) (USPUT, error) {
 		return usput, err
 	}
 
-	coreSegment, err := sections.NewUPSUTCoreSegment(bitStream)
+	coreSegment, err := NewUPSUTCoreSegment(bitStream)
 	if err != nil {
 		return usput, err
 	}
