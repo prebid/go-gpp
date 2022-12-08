@@ -35,6 +35,7 @@ func TestReadByte1(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, byte(test.value), b)
+				assert.Equal(t, test.offset+1, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
@@ -66,6 +67,7 @@ func TestReadByte4(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, byte(test.value), b)
+				assert.Equal(t, test.offset+4, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
@@ -95,6 +97,7 @@ func TestReadByte6(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, byte(test.value), b)
+				assert.Equal(t, test.offset+6, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
@@ -123,6 +126,7 @@ func TestReadByte8(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, byte(test.value), b)
+				assert.Equal(t, test.offset+8, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
@@ -154,6 +158,7 @@ func TestReadUInt12(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, uint16(test.value), i)
+				assert.Equal(t, test.offset+12, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
@@ -184,6 +189,7 @@ func TestReadUInt16(t *testing.T) {
 			if test.err == "" {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, uint16(test.value), i)
+				assert.Equal(t, test.offset+16, bs.p)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
