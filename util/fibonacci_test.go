@@ -34,10 +34,6 @@ func TestReadFibonnaciInt(t *testing.T) {
 	i, err := bs.ReadFibonacciInt()
 	assert.Equal(t, "error reading bit 2 of Integer(Fibonacci): expected 1 bit at bit 48, but the byte array was only 6 bytes long", err.Error())
 
-	// bs = BitStream{b: testData, p: 40}
-	// i, err = bs.ReadUInt16()
-	// assertStringsEqual(t, "Expected a 16-bit int to start at bit 40, but the byte array was only 6 bytes long", err.Error())
-
 	for _, test := range fibtestData {
 		bs = BitStream{b: test.data, p: test.offset}
 		i, err = bs.ReadFibonacciInt()
