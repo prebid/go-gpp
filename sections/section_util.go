@@ -29,10 +29,6 @@ func ErrorHelper(name string, err error) error {
 	return fmt.Errorf("unable to set field %s due to parse error: %s", name, err.Error())
 }
 
-func errorHelper(name string, err error) error {
-	return fmt.Errorf("unable to set field %s due to parse error: %s", name, err.Error())
-}
-
 func NewCommonUSCoreSegment(sensitiveDataFields int, knownChildDataFields int, bs *util.BitStream) (CommonUSCoreSegment, error) {
 	var commonUSCore CommonUSCoreSegment
 	var err error

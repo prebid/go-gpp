@@ -23,7 +23,7 @@ func TestUSPCA(t *testing.T) {
 				110001 10 01 01 10 00 000101100001000110 0000 00 10 01 10 01 0
 			*/
 			expected: USPCA{
-				CoreSegment: sections.USPCACoreSegment{
+				CoreSegment: USPCACoreSegment{
 					Version:                     49,
 					SaleOptOutNotice:            2,
 					SharingOptOutNotice:         1,
