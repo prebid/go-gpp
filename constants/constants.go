@@ -5,6 +5,7 @@ type SectionID int
 const (
 	SectionTCFEU2 SectionID = 2
 	SectionGPP    SectionID = 3
+	SectionUSPV1  SectionID = 6
 	SectionUSPNAT SectionID = 7
 	SectionUSPCA  SectionID = 8
 	SectionUSPVA  SectionID = 9
