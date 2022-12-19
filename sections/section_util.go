@@ -1,7 +1,9 @@
 package sections
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/prebid/go-gpp/util"
 )
@@ -95,10 +97,14 @@ func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	var commonUSGPC CommonUSGPCSegment
 	var err error
 
-	commonUSGPC.SubsectionType, err = bs.ReadByte2()
+	// GPC segment subsection type can only be 1
+	// read 2 bits from the bitstream to ensure proper formatting
+	_, err = bs.ReadByte2()
 	if err != nil {
 		return commonUSGPC, ErrorHelper("GPCSegment.SubsectionType", err)
 	}
+
+	commonUSGPC.SubsectionType = 1
 
 	gpc, err := bs.ReadByte1()
 	if err != nil {
@@ -107,4 +113,28 @@ func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	commonUSGPC.Gpc = (gpc == 1)
 
 	return commonUSGPC, nil
+}
+
+func CreateBitStreams(encoded string, gpcCheck bool) (*util.BitStream, *util.BitStream, error) {
+	segments := strings.Split(encoded, ".")
+
+	if len(segments) == 0 {
+		return nil, nil, errors.New("no segments found in encoded string")
+	}
+
+	coreBitStream, err := util.NewBitStreamFromBase64(segments[0])
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if gpcCheck && len(segments) > 1 {
+		gpcBitStream, err := util.NewBitStreamFromBase64(segments[1])
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return coreBitStream, gpcBitStream, nil
+	}
+
+	return coreBitStream, nil, nil
 }

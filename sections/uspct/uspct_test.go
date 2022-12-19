@@ -18,9 +18,9 @@ func TestUSPCT(t *testing.T) {
 	testData := []uspctTestData{
 		{
 			description: "should populate USPCT segments correctly",
-			gppString:   "bSFgmSZS",
+			gppString:   "bSFgmSZW.YAAA",
 			/*
-				011011 01 00 10 00 01 0110000010011001 001001 10 01 01 00 1
+				011011 01 00 10 00 01 0110000010011001 001001 10 01 01 01 1 011
 			*/
 			expected: USPCT{
 				CoreSegment: sections.CommonUSCoreSegment{
@@ -41,11 +41,11 @@ func TestUSPCT(t *testing.T) {
 					MspaServiceProviderMode: 1,
 				},
 				GPCSegment: sections.CommonUSGPCSegment{
-					SubsectionType: 0,
+					SubsectionType: 1,
 					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPCT,
-				Value:     "bSFgmSZS",
+				Value:     "bSFgmSZW.YAAA",
 			},
 		},
 	}

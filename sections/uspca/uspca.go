@@ -98,19 +98,26 @@ func NewUSPCACoreSegment(bs *util.BitStream) (USPCACoreSegment, error) {
 func NewUSPCA(encoded string) (USPCA, error) {
 	uspca := USPCA{}
 
-	bitStream, err := util.NewBitStreamFromBase64(encoded)
+	coreBitStream, gpcBitStream, err := sections.CreateBitStreams(encoded, true)
 	if err != nil {
 		return uspca, err
 	}
 
-	coreSegment, err := NewUSPCACoreSegment(bitStream)
+	coreSegment, err := NewUSPCACoreSegment(coreBitStream)
 	if err != nil {
 		return uspca, err
 	}
 
-	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
-	if err != nil {
-		return uspca, err
+	gpcSegment := sections.CommonUSGPCSegment{
+		SubsectionType: 1,
+		Gpc:            false,
+	}
+
+	if gpcBitStream != nil {
+		gpcSegment, err = sections.NewCommonUSGPCSegment(gpcBitStream)
+		if err != nil {
+			return uspca, err
+		}
 	}
 
 	uspca = USPCA{

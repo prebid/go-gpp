@@ -3,7 +3,6 @@ package uspct
 import (
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/sections"
-	"github.com/prebid/go-gpp/util"
 )
 
 type USPCT struct {
@@ -16,19 +15,26 @@ type USPCT struct {
 func NewUSPCT(encoded string) (USPCT, error) {
 	uspct := USPCT{}
 
-	bitStream, err := util.NewBitStreamFromBase64(encoded)
+	coreBitStream, gpcBitStream, err := sections.CreateBitStreams(encoded, true)
 	if err != nil {
 		return uspct, err
 	}
 
-	coreSegment, err := sections.NewCommonUSCoreSegment(8, 3, bitStream)
+	coreSegment, err := sections.NewCommonUSCoreSegment(8, 3, coreBitStream)
 	if err != nil {
 		return uspct, err
 	}
 
-	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
-	if err != nil {
-		return uspct, err
+	gpcSegment := sections.CommonUSGPCSegment{
+		SubsectionType: 1,
+		Gpc:            false,
+	}
+
+	if gpcBitStream != nil {
+		gpcSegment, err = sections.NewCommonUSGPCSegment(gpcBitStream)
+		if err != nil {
+			return uspct, err
+		}
 	}
 
 	uspct = USPCT{

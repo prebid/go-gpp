@@ -18,9 +18,9 @@ func TestUSPCO(t *testing.T) {
 	testData := []uspcoTestData{
 		{
 			description: "should populate USPCO segments correctly",
-			gppString:   "bSFgmJQA",
+			gppString:   "bSFgmJQA.YAAA",
 			/*
-				011011 01 00 10 00 01 01100000100110 00 10 01 01 00 0
+				011011 01 00 10 00 01 01100000100110 00 10 01 01 00 0 011
 			*/
 			expected: USPCO{
 				CoreSegment: sections.CommonUSCoreSegment{
@@ -39,11 +39,11 @@ func TestUSPCO(t *testing.T) {
 					MspaServiceProviderMode:         1,
 				},
 				GPCSegment: sections.CommonUSGPCSegment{
-					SubsectionType: 0,
-					Gpc:            false,
+					SubsectionType: 1,
+					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPCO,
-				Value:     "bSFgmJQA",
+				Value:     "bSFgmJQA.YAAA",
 			},
 		},
 	}

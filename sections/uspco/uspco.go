@@ -3,7 +3,6 @@ package uspco
 import (
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/sections"
-	"github.com/prebid/go-gpp/util"
 )
 
 type USPCO struct {
@@ -16,19 +15,26 @@ type USPCO struct {
 func NewUSPCO(encoded string) (USPCO, error) {
 	uspco := USPCO{}
 
-	bitStream, err := util.NewBitStreamFromBase64(encoded)
+	coreBitStream, gpcBitStream, err := sections.CreateBitStreams(encoded, true)
 	if err != nil {
 		return uspco, err
 	}
 
-	coreSegment, err := sections.NewCommonUSCoreSegment(7, 1, bitStream)
+	coreSegment, err := sections.NewCommonUSCoreSegment(7, 1, coreBitStream)
 	if err != nil {
 		return uspco, err
 	}
 
-	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
-	if err != nil {
-		return uspco, err
+	gpcSegment := sections.CommonUSGPCSegment{
+		SubsectionType: 1,
+		Gpc:            false,
+	}
+
+	if gpcBitStream != nil {
+		gpcSegment, err = sections.NewCommonUSGPCSegment(gpcBitStream)
+		if err != nil {
+			return uspco, err
+		}
 	}
 
 	uspco = USPCO{

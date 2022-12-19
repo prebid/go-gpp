@@ -122,19 +122,26 @@ func NewUSPNATCoreSegment(bs *util.BitStream) (USPNATCoreSegment, error) {
 func NewUSPNAT(encoded string) (USPNAT, error) {
 	uspnat := USPNAT{}
 
-	bitStream, err := util.NewBitStreamFromBase64(encoded)
+	coreBitStream, gpcBitStream, err := sections.CreateBitStreams(encoded, true)
 	if err != nil {
 		return uspnat, err
 	}
 
-	coreSegment, err := NewUSPNATCoreSegment(bitStream)
+	coreSegment, err := NewUSPNATCoreSegment(coreBitStream)
 	if err != nil {
 		return uspnat, err
 	}
 
-	gpcSegment, err := sections.NewCommonUSGPCSegment(bitStream)
-	if err != nil {
-		return uspnat, err
+	gpcSegment := sections.CommonUSGPCSegment{
+		SubsectionType: 1,
+		Gpc:            false,
+	}
+
+	if gpcBitStream != nil {
+		gpcSegment, err = sections.NewCommonUSGPCSegment(gpcBitStream)
+		if err != nil {
+			return uspnat, err
+		}
 	}
 
 	uspnat = USPNAT{
