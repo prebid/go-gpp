@@ -44,6 +44,34 @@ func TestReadByte1(t *testing.T) {
 
 }
 
+func TestParseByte2(t *testing.T) {
+	testSet := map[string]testDefinition{
+		"Bits overrun": {testData, 47, 0,
+			"expected 2 bits to start at bit 47, but the byte array was only 6 bytes long"},
+		"Bits out of bounds": {testData, 80, 0,
+			"expected 2 bits to start at bit 80, but the byte array was only 6 bytes long"},
+		"Spans 2 bytes":    {testData, 31, 2, ""}, // testData duplicate of Offset which involves flowing over to a second byte
+		"Spans 2 bytes 2":  {testData, 23, 3, ""}, // testData duplicate of Offset which involves flowing over to a second byte
+		"nibble aligned":   {testData, 9, 1, ""},  // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"nibble aligned 2": {testData, 10, 2, ""}, // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"nibble aligned 3": {testData, 44, 2, ""}, // testData duplicate of Offset which aligns with a nibble and doesn't span over multiple bytes
+		"No offset":        {testData, 0, 0, ""},  // No offset
+	}
+
+	for name, test := range testSet {
+		t.Run(name, func(t *testing.T) {
+			bs := BitStream{b: test.data, p: test.offset}
+			b, err := bs.ReadByte2()
+			if test.err == "" {
+				assert.Nil(t, err, "Found unexpected error: %s", err)
+				assert.Equal(t, byte(test.value), b)
+			} else {
+				assert.Equal(t, test.err, err.Error())
+			}
+		})
+	}
+}
+
 func TestReadByte4(t *testing.T) {
 	testSet := map[string]testDefinition{
 		"Bits overrun": {testData, 46, 0,
@@ -98,6 +126,37 @@ func TestReadByte6(t *testing.T) {
 				assert.Nil(t, err, "Found unexpected error: %s", err)
 				assert.Equal(t, byte(test.value), b)
 				assert.Equal(t, test.offset+6, bs.p)
+			} else {
+				assert.Equal(t, test.err, err.Error())
+			}
+		})
+	}
+}
+
+type bitFieldTestDefinition struct {
+	data   []byte // The data to feed the function
+	offset uint16 // The bit offset in the byte slice to start
+	fields int    // The number of 2-bit fields to read
+	value  []byte // The expected return value
+	err    string // Expected error value
+}
+
+func TestReadTwoBitField(t *testing.T) {
+	testSet := map[string]bitFieldTestDefinition{
+		"Read 6 bitfields":                          {testData, 0, 6, []byte{0, 0, 1, 0, 2, 2}, ""},
+		"Read 8 bitfields":                          {testData, 12, 8, []byte{0, 2, 0, 0, 0, 3, 2, 3}, ""},
+		"Read 10 bitfields":                         {testData, 28, 10, []byte{0, 1, 0, 0, 0, 0, 0, 2, 2, 3}, ""},
+		"Error reading end of bitstream":            {testData, 48, 2, []byte{}, "expected 2 bits to start at bit 48, but the byte array was only 6 bytes long"},
+		"Error passing in invalid number of fields": {testData, 0, -2, []byte{}, "numFields is invalid"},
+	}
+
+	for name, test := range testSet {
+		t.Run(name, func(t *testing.T) {
+			bs := BitStream{b: test.data, p: test.offset}
+			b, err := bs.ReadTwoBitField(test.fields)
+			if test.err == "" {
+				assert.Nil(t, err, "Found unexpected error: %s", err)
+				assert.Equal(t, test.value, b)
 			} else {
 				assert.Equal(t, test.err, err.Error())
 			}
