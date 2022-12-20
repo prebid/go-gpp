@@ -97,14 +97,14 @@ func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	var commonUSGPC CommonUSGPCSegment
 	var err error
 
-	// GPC segment subsection type can only be 1
-	// read 2 bits from the bitstream to ensure proper formatting
-	_, err = bs.ReadByte2()
+	commonUSGPC.SubsectionType, err = bs.ReadByte2()
 	if err != nil {
 		return commonUSGPC, ErrorHelper("GPCSegment.SubsectionType", err)
 	}
 
-	commonUSGPC.SubsectionType = 1
+	if commonUSGPC.SubsectionType != 1 {
+		return commonUSGPC, fmt.Errorf("invalid subsection type %d for GPC segment", commonUSGPC.SubsectionType)
+	}
 
 	gpc, err := bs.ReadByte1()
 	if err != nil {
