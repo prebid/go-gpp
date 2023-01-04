@@ -30,37 +30,37 @@ type Section interface {
 	GetValue() string // base64 encoding usually, but plaintext for ccpa
 }
 
-func Parse(v string) (GppContainer, error) {
+func Parse(v string) (GppContainer, []error) {
 	var gpp GppContainer
 
 	sectionStrings := strings.Split(v, "~")
 
 	bs, err := util.NewBitStreamFromBase64(sectionStrings[0])
 	if err != nil {
-		return gpp, fmt.Errorf("error parsing GPP header, base64 decoding: %s", err)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, base64 decoding: %s", err)}
 	}
 	if bs.Len() < MaxHeaderLength {
-		return gpp, fmt.Errorf("error parsing GPP header, should be at least %d bytes long", MaxHeaderLength)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, should be at least %d bytes long", MaxHeaderLength)}
 	}
 
 	// base64 encoding codes just 6 bits into each byte. The first 6 bits of the header must always evaluate
 	// to the integer '3' as the GPP header type. Short cut the processing of a 6 bit integer with a simple
 	// byte comparison to shave off a few CPU cycles.
 	if sectionStrings[0][0] != SectionGPPByte {
-		return gpp, fmt.Errorf("error parsing GPP header, header must have type=%d", constants.SectionGPP)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, header must have type=%d", constants.SectionGPP)}
 	}
 	// We checked the GPP header type above outside of the bitstream framework, so we advance the bit stream past the first 6 bits.
 	bs.SetPosition(6)
 
 	ver, err := bs.ReadByte6()
 	if err != nil {
-		return gpp, fmt.Errorf("error parsing GPP header, unable to parse GPP version: %s", err)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, unable to parse GPP version: %s", err)}
 	}
 	gpp.Version = int(ver)
 
 	intRange, err := bs.ReadFibonacciRange()
 	if err != nil {
-		return gpp, fmt.Errorf("error parsing GPP header, section identifiers: %s", err)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, section identifiers: %s", err)}
 	}
 
 	// We do not count the GPP header as a section
@@ -73,37 +73,64 @@ func Parse(v string) (GppContainer, error) {
 		}
 	}
 	if len(secIDs) != secCount {
-		return gpp, fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)
+		return gpp, []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)}
 	}
 	gpp.SectionTypes = secIDs
 
 	sections := make([]Section, secCount)
+	var errs []error
 	for i, id := range secIDs {
 		switch id {
 		case constants.SectionUSPNAT:
 			sections[i], err = uspnat.NewUSPNAT(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		case constants.SectionUSPCA:
 			sections[i], err = uspca.NewUSPCA(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		case constants.SectionUSPVA:
 			sections[i], err = uspva.NewUSPVA(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		case constants.SectionUSPCO:
 			sections[i], err = uspco.NewUSPCO(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		case constants.SectionUSPUT:
 			sections[i], err = usput.NewUSPUT(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		case constants.SectionUSPCT:
 			sections[i], err = uspct.NewUSPCT(sectionStrings[i+1])
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		default:
 			sections[i] = GenericSection{sectionID: id, value: sectionStrings[i+1]}
+			if err != nil {
+				errs = append(errs, sectionParseError(int(id), err))
+			}
 		}
-	}
-
-	if err != nil {
-		return gpp, err
 	}
 
 	gpp.Sections = sections
 
-	return gpp, nil
+	return gpp, errs
+}
+
+func sectionParseError(id int, err error) error {
+	if id < len(constants.SectionIDNames) && id > 0 {
+		return fmt.Errorf("Error parsing %s consent string: %s", constants.SectionIDNames[id], err)
+	} else {
+		return fmt.Errorf("Error parsing UNKNOWN consent string: %s", err)
+	}
+
 }
 
 type GenericSection struct {
