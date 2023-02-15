@@ -3,6 +3,7 @@ package uspct
 import (
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/sections"
+	"github.com/prebid/go-gpp/util"
 )
 
 type USPCT struct {
@@ -45,6 +46,19 @@ func NewUSPCT(encoded string) (USPCT, error) {
 	}
 
 	return uspct, nil
+}
+
+func (uspct USPCT) Encode(gpcIncluded bool) []byte {
+	bs := util.NewBitStream(nil)
+	uspct.CoreSegment.Encode(bs)
+	res := bs.Base64Encode()
+	if !gpcIncluded {
+		return res
+	}
+	bs.Reset()
+	res = append(res, '.')
+	uspct.GPCSegment.Encode(bs)
+	return append(res, bs.Base64Encode()...)
 }
 
 func (uspct USPCT) GetID() constants.SectionID {
