@@ -18,7 +18,7 @@ func TestUSPCO(t *testing.T) {
 	testData := []uspcoTestData{
 		{
 			description: "should populate USPCO segments correctly",
-			gppString:   "bSFgmJQA.YAAA",
+			gppString:   "bSFgmJQ.YA",
 			/*
 				011011 01 00 10 00 01 01100000100110 00 10 01 01 00 0 011
 			*/
@@ -43,17 +43,19 @@ func TestUSPCO(t *testing.T) {
 					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPCO,
-				Value:     "bSFgmJQA.YAAA",
+				Value:     "bSFgmJQ.YA",
 			},
 		},
 	}
 
 	for _, test := range testData {
 		result, err := NewUSPCO(test.gppString)
+		encodedString := string(test.expected.Encode(true))
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
 		assert.Equal(t, constants.SectionUSPCO, result.GetID())
 		assert.Equal(t, test.gppString, result.GetValue())
+		assert.Equal(t, test.gppString, encodedString)
 	}
 }

@@ -3,6 +3,7 @@ package uspco
 import (
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/sections"
+	"github.com/prebid/go-gpp/util"
 )
 
 type USPCO struct {
@@ -45,6 +46,19 @@ func NewUSPCO(encoded string) (USPCO, error) {
 	}
 
 	return uspco, nil
+}
+
+func (uspco USPCO) Encode(gpcIncluded bool) []byte {
+	bs := util.NewBitStream(nil)
+	uspco.CoreSegment.Encode(bs)
+	res := bs.Base64Encode()
+	if !gpcIncluded {
+		return res
+	}
+	bs.Reset()
+	res = append(res, '.')
+	uspco.GPCSegment.Encode(bs)
+	return append(res, bs.Base64Encode()...)
 }
 
 func (uspco USPCO) GetID() constants.SectionID {
