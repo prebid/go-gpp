@@ -28,6 +28,7 @@ type GppContainer struct {
 type Section interface {
 	GetID() constants.SectionID
 	GetValue() string // base64 encoding usually, but plaintext for ccpa
+	Encode(bool) []byte
 }
 
 func Parse(v string) (GppContainer, []error) {
@@ -135,4 +136,8 @@ func (gs GenericSection) GetID() constants.SectionID {
 
 func (gs GenericSection) GetValue() string {
 	return gs.value
+}
+
+func (gs GenericSection) Encode(bool) []byte {
+	return []byte(gs.value)
 }

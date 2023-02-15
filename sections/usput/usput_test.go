@@ -46,7 +46,7 @@ func TestUSPUT(t *testing.T) {
 
 	for _, test := range testData {
 		result, err := NewUSPUT(test.gppString)
-		encodedString := string(test.expected.Encode())
+		encodedString := string(test.expected.Encode(true))
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
