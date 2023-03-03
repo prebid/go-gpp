@@ -14,5 +14,14 @@ const (
 	SectionUSPCT  SectionID = 12
 )
 
-var SectionIDNames = []string{"ID0", "ID1", "tcfeu2", "gpp header", "ID4", "ID5", "uspv1", "uspnat",
-	"uspca", "uspva", "uspco", "usput", "uspct"}
+var SectionNamesByID = map[int]string{
+	2:  "tcfeu2",
+	3:  "gpp header",
+	6:  "uspv1",
+	7:  "uspnat",
+	8:  "uspca",
+	9:  "uspva",
+	10: "uspco",
+	11: "usput",
+	12: "uspct",
+}

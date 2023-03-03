@@ -84,37 +84,37 @@ func Parse(v string) (GppContainer, []error) {
 		case constants.SectionUSPNAT:
 			sections[i], err = uspnat.NewUSPNAT(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		case constants.SectionUSPCA:
 			sections[i], err = uspca.NewUSPCA(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		case constants.SectionUSPVA:
 			sections[i], err = uspva.NewUSPVA(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		case constants.SectionUSPCO:
 			sections[i], err = uspco.NewUSPCO(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		case constants.SectionUSPUT:
 			sections[i], err = usput.NewUSPUT(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		case constants.SectionUSPCT:
 			sections[i], err = uspct.NewUSPCT(sectionStrings[i+1])
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing %s consent string: %s", constants.SectionNamesByID[int(id)], err))
 			}
 		default:
 			sections[i] = GenericSection{sectionID: id, value: sectionStrings[i+1]}
 			if err != nil {
-				errs = append(errs, sectionParseError(int(id), err))
+				errs = append(errs, fmt.Errorf("error parsing unsupported (section %d) consent string: %s", int(id), err))
 			}
 		}
 	}
@@ -122,15 +122,6 @@ func Parse(v string) (GppContainer, []error) {
 	gpp.Sections = sections
 
 	return gpp, errs
-}
-
-func sectionParseError(id int, err error) error {
-	if id < len(constants.SectionIDNames) && id > 0 {
-		return fmt.Errorf("Error parsing %s consent string: %s", constants.SectionIDNames[id], err)
-	} else {
-		return fmt.Errorf("Error parsing UNKNOWN consent string: %s", err)
-	}
-
 }
 
 type GenericSection struct {

@@ -129,7 +129,7 @@ func TestParse(t *testing.T) {
 		"GPP-uspca-error": {
 			description:   "GPP string with USPCA",
 			gppString:     "DBABBgA~xlgWE",
-			expectedError: []error{fmt.Errorf("Error parsing uspca consent string: illegal base64 data at input byte 4")},
+			expectedError: []error{fmt.Errorf("error parsing uspca consent string: illegal base64 data at input byte 4")},
 		},
 	}
 
