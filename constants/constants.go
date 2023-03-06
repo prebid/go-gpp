@@ -13,3 +13,15 @@ const (
 	SectionUSPUT  SectionID = 11
 	SectionUSPCT  SectionID = 12
 )
+
+var SectionNamesByID = map[int]string{
+	2:  "tcfeu2",
+	3:  "gpp header",
+	6:  "uspv1",
+	7:  "uspnat",
+	8:  "uspca",
+	9:  "uspva",
+	10: "uspco",
+	11: "usput",
+	12: "uspct",
+}
