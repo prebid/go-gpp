@@ -8,6 +8,9 @@ import (
 	"github.com/prebid/go-gpp/util"
 )
 
+// CommonUSCoreSegment replicates the structure of many US State consent strings, and as such is shared
+// across those state implementations. Do note an array of size one is a valid construct
+// if the state only has one subfield for that field.
 type CommonUSCoreSegment struct {
 	Version                         byte
 	SharingNotice                   byte
