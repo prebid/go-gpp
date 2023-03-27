@@ -175,7 +175,7 @@ func TestWriteFibonacciInt(t *testing.T) {
 		{[]uint16{5}, []byte{0x18}, nil},
 		{[]uint16{7, 12}, []byte{0x5d, 0x60}, nil},
 		{[]uint16{0, 6765}, nil, fibEncodeNumOutOfRangeErr},
-		{[]uint16{6764}, []byte{}, nil},
+		{[]uint16{6764}, []byte{0x55, 0x55, 0x60}, nil},
 	}
 
 	for _, test := range fibWriteTestData {
