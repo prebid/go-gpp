@@ -19,7 +19,7 @@ var (
 )
 
 func Encode(sections []Section) (string, error) {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	builder := strings.Builder{}
 
 	bs.WriteByte6(gppType)

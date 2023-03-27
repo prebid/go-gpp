@@ -174,7 +174,7 @@ func NewUSPNAT(encoded string) (USPNAT, error) {
 }
 
 func (uspnat USPNAT) Encode(gpcIncluded bool) []byte {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	uspnat.CoreSegment.Encode(bs)
 	res := bs.Base64Encode()
 	if !gpcIncluded {

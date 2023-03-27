@@ -49,7 +49,7 @@ func NewUSPCT(encoded string) (USPCT, error) {
 }
 
 func (uspct USPCT) Encode(gpcIncluded bool) []byte {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	uspct.CoreSegment.Encode(bs)
 	res := bs.Base64Encode()
 	if !gpcIncluded {

@@ -146,7 +146,7 @@ func NewUSPCA(encoded string) (USPCA, error) {
 }
 
 func (uspca USPCA) Encode(gpcIncluded bool) []byte {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	uspca.CoreSegment.Encode(bs)
 	res := bs.Base64Encode()
 	if !gpcIncluded {

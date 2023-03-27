@@ -132,7 +132,7 @@ func NewUSPUT(encoded string) (USPUT, error) {
 }
 
 func (usput USPUT) Encode(bool) []byte {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	usput.CoreSegment.Encode(bs)
 	return bs.Base64Encode()
 }

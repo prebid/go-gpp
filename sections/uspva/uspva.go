@@ -39,7 +39,7 @@ func NewUSPVA(encoded string) (USPVA, error) {
 }
 
 func (uspva USPVA) Encode(bool) []byte {
-	bs := util.NewBitStream(nil)
+	bs := util.NewBitStreamForWrite()
 	uspva.CoreSegment.Encode(bs)
 	return bs.Base64Encode()
 }

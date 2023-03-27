@@ -3,18 +3,50 @@ package util
 import (
 	"encoding/base64"
 	"fmt"
+	"unsafe"
 )
 
 var (
 	fibEncodeNumOutOfRangeErr = fmt.Errorf("the number to be encoded is out of range")
 )
 
+func getByteSlice() []byte {
+	// Most string need to be encoded are less than 8 bytes.
+	return make([]byte, 0, 8)
+}
+
+func NewBitStreamForWrite() *BitStream {
+	return NewBitStream(getByteSlice())
+}
+
 // enlarge enlarges the underlying byte slice.
 func (bs *BitStream) enlarge(n uint16) {
-	final := (bs.p + n + 7) / 8
-	for final > bs.Len() {
-		bs.b = append(bs.b, 0x00)
+	final := int(bs.p+n+7) / 8
+	// Under most circumstances, the value of final will hit this if condition.
+	if final <= cap(bs.b) {
+		bs.b = bs.b[:final]
+		return
 	}
+
+	const expThreshold = 64
+	const step = 16
+	var temp []byte
+
+	if final <= expThreshold {
+		finalF := float32(final - 1)
+		// Find out the leftmost one's position.
+		pos := *(*int)(unsafe.Pointer(&finalF))>>23&255 - 127
+		size := 1
+		if pos >= 0 {
+			size = 1 << (pos + 1)
+		}
+		temp = make([]byte, final, size)
+	} else {
+		size := (final-expThreshold+step-1)/step*step + expThreshold
+		temp = make([]byte, final, size)
+	}
+	copy(temp, bs.b)
+	bs.b = temp
 }
 
 // appendNBits appends n bits in b from left to right to the BitStream.
@@ -42,7 +74,7 @@ func (bs *BitStream) Base64Encode() []byte {
 
 // Reset clears all the data a BitStream holds.
 func (bs *BitStream) Reset() {
-	bs.b = nil
+	bs.b = getByteSlice()
 	bs.p = 0
 }
 
