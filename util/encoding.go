@@ -8,6 +8,7 @@ import (
 
 var (
 	fibEncodeNumOutOfRangeErr = fmt.Errorf("the number to be encoded is out of range")
+	fibEncodeInvalidRange     = fmt.Errorf("the range is invalid")
 )
 
 func getByteSlice() []byte {
@@ -174,24 +175,29 @@ func (bs *BitStream) WriteIntRange(intRange *IntRange) error {
 	var err error
 	bs.WriteUInt12(intRange.Size)
 	// Assume that the ranges are ordered.
+	var prevID uint16
 	for _, r := range intRange.Range {
+		if r.EndID < r.StartID {
+			return fibEncodeInvalidRange
+		}
 		if r.StartID == r.EndID {
 			bs.WriteByte1(0)
-			err = bs.WriteFibonacciInt(r.StartID)
+			err = bs.WriteFibonacciInt(r.StartID - prevID)
 			if err != nil {
 				return fmt.Errorf("write int range error: %v", err)
 			}
 		} else {
 			bs.WriteByte1(1)
-			err = bs.WriteFibonacciInt(r.StartID)
+			err = bs.WriteFibonacciInt(r.StartID - prevID)
 			if err != nil {
 				return fmt.Errorf("write int range error: %v", err)
 			}
-			err = bs.WriteFibonacciInt(r.EndID)
+			err = bs.WriteFibonacciInt(r.EndID - r.StartID)
 			if err != nil {
 				return fmt.Errorf("write int range error: %v", err)
 			}
 		}
+		prevID = r.EndID
 	}
 	return nil
 }

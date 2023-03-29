@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// the first 6 bits of the header must always evaluate to the interger '3'.
+	// the first 6 bits of the header must always evaluate to the integer '3'.
 	gppType    byte = 0x3
 	gppVersion byte = 0x1
 )
@@ -43,7 +43,7 @@ func Encode(sections []Section) (string, error) {
 		}
 		prevID = id
 	}
-	intRange.Size = uint16(len(sections))
+	intRange.Size = uint16(len(intRange.Range))
 
 	err := bs.WriteIntRange(intRange)
 	if err != nil {
