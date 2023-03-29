@@ -177,24 +177,24 @@ func (bs *BitStream) WriteIntRange(intRange *IntRange) error {
 	// Assume that the ranges are ordered.
 	var prevID uint16
 	for _, r := range intRange.Range {
-		if r.EndID < r.StartID {
+		if r.EndID < r.StartID || prevID >= r.StartID {
 			return fibEncodeInvalidRange
 		}
 		if r.StartID == r.EndID {
 			bs.WriteByte1(0)
 			err = bs.WriteFibonacciInt(r.StartID - prevID)
 			if err != nil {
-				return fmt.Errorf("write int range error: %v", err)
+				return err
 			}
 		} else {
 			bs.WriteByte1(1)
 			err = bs.WriteFibonacciInt(r.StartID - prevID)
 			if err != nil {
-				return fmt.Errorf("write int range error: %v", err)
+				return err
 			}
 			err = bs.WriteFibonacciInt(r.EndID - r.StartID)
 			if err != nil {
-				return fmt.Errorf("write int range error: %v", err)
+				return err
 			}
 		}
 		prevID = r.EndID

@@ -188,3 +188,48 @@ func TestWriteFibonacciInt(t *testing.T) {
 		assert.Equal(t, test.result, bs.b)
 	}
 }
+
+func TestWriteIntRange(t *testing.T) {
+	cases := []*struct {
+		r      []IRange
+		result []byte
+		err    error
+	}{
+		{
+			[]IRange{{2, 2}, {4, 4}, {6, 9}},
+			[]byte{0b00000000, 0b00110011, 0b00111011, 0b00110000},
+			nil,
+		},
+		{
+			[]IRange{{2, 5}, {6, 8}, {13, 16}, {28, 39}},
+			[]byte{0b00000000, 0b01001011, 0b00111110, 0b11100011, 0b00111101, 0b01100101, 0b10000000},
+			nil,
+		},
+		{
+			[]IRange{{2, 1}, {4, 4}, {6, 9}},
+			nil,
+			fibEncodeInvalidRange,
+		},
+		{
+			[]IRange{{2, 2}, {2, 4}, {6, 9}},
+			nil,
+			fibEncodeInvalidRange,
+		},
+		{
+			[]IRange{{2, 5}, {6, 8}, {13, 16}, {28, 9999}},
+			nil,
+			fibEncodeNumOutOfRangeErr,
+		},
+	}
+
+	var err error
+	for _, c := range cases {
+		bs := NewBitStream(nil)
+		intRange := IntRange{Range: c.r, Size: uint16(len(c.r))}
+		err = bs.WriteIntRange(&intRange)
+		assert.Equal(t, c.err, err)
+		if err == nil {
+			assert.Equal(t, c.result, bs.b)
+		}
+	}
+}
