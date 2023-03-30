@@ -303,7 +303,35 @@ func TestEncode(t *testing.T) {
 	}
 }
 
+// Decode given GPP strings and re-encode them to see if we can get the original ones back.
+func TestEncode2(t *testing.T) {
+	gppStrings := []string{
+		"DBABh4A~BlgWEYCY.QA~BSFgmiU",
+		"DBABRg~bSFgmiU",
+		"DBABJg~bSFgmJQ.YA",
+		"DBABVg~bSFgmSZQ.YA",
+		"DBABLA~DSJgmkoZJSA.YA",
+		"DBADLO8~BSJgmkoZJSA.YA~BSFgmiU~BWJYJllA~BSFgmSZQ.YA",
+		"DBABrGA~DSJgmkoZJSA.YA~BlgWEYCY.QA~BSFgmiU~bSFgmJQ.YA~BWJYJllA~bSFgmSZQ.YA",
+		"DBACLMA~BAAAAAAAAAA.QA~BaAAAAA",
+		"DBACTjw~1YYN~BSZZYgkA~BaRlkCSA.QA",
+		"DBACMYA~CPpcCoAPpcCoAPoABABGCyCUACAAACAAAAAAAVQAQAVABZABABYAAAAA.QADgIAAA.IABE~CPpcCoAPpcCoAPoABABGCyCQAEAAAEAAAAEFABAEEAN8AEAN4A.YAAAAAAAAAA",
+	}
+	for _, s := range gppStrings {
+		container, errs := Parse(s)
+		if len(errs) != 0 {
+			t.Fatal(errs)
+		}
+		gpp, err := Encode(container.Sections)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, s, gpp)
+	}
+}
+
 // go test -bench="^BenchmarkEncode$" -benchmem .
+// BenchmarkEncode-8         845827              1389 ns/op             472 B/op         27 allocs/op (Apple M1 Pro)
 func BenchmarkEncode(b *testing.B) {
 	secSet := map[constants.SectionID]Section{}
 	for i := 0; i < len(testData); i++ {
