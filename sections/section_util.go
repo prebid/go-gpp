@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/prebid/go-gpp/util"
+	"github.com/revcontent-production/go-gpp/util"
 )
 
 // CommonUSCoreSegment replicates the structure of many US State consent strings, and as such is shared

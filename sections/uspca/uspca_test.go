@@ -3,8 +3,8 @@ package uspca
 import (
 	"testing"
 
-	"github.com/prebid/go-gpp/constants"
-	"github.com/prebid/go-gpp/sections"
+	"github.com/revcontent-production/go-gpp/constants"
+	"github.com/revcontent-production/go-gpp/sections"
 	"github.com/stretchr/testify/assert"
 )
 

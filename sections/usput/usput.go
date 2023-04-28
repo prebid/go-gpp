@@ -1,9 +1,9 @@
 package usput
 
 import (
-	"github.com/prebid/go-gpp/constants"
-	"github.com/prebid/go-gpp/sections"
-	"github.com/prebid/go-gpp/util"
+	"github.com/revcontent-production/go-gpp/constants"
+	"github.com/revcontent-production/go-gpp/sections"
+	"github.com/revcontent-production/go-gpp/util"
 )
 
 type USPUTCoreSegment struct {
