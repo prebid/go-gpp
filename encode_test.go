@@ -23,31 +23,32 @@ var testData = []gppEncodeTestData{
 	{
 		description: "USPCA GPP string encoding",
 		expected:    "DBABh4A~BlgWEYCY.QA~BSFgmiU",
-		sections: []Section{uspca.USPCA{
-			CoreSegment: uspca.USPCACoreSegment{
-				Version:                     1,
-				SaleOptOutNotice:            2,
-				SharingOptOutNotice:         1,
-				SensitiveDataLimitUseNotice: 1,
-				SaleOptOut:                  2,
-				SharingOptOut:               0,
-				SensitiveDataProcessing: []byte{
-					0, 1, 1, 2, 0, 1, 0, 1, 2,
+		sections: []Section{
+			uspca.USPCA{
+				CoreSegment: uspca.USPCACoreSegment{
+					Version:                     1,
+					SaleOptOutNotice:            2,
+					SharingOptOutNotice:         1,
+					SensitiveDataLimitUseNotice: 1,
+					SaleOptOut:                  2,
+					SharingOptOut:               0,
+					SensitiveDataProcessing: []byte{
+						0, 1, 1, 2, 0, 1, 0, 1, 2,
+					},
+					KnownChildSensitiveDataConsents: []byte{
+						0, 0,
+					},
+					PersonalDataConsents:    0,
+					MspaCoveredTransaction:  2,
+					MspaOptOutOptionMode:    1,
+					MspaServiceProviderMode: 2,
 				},
-				KnownChildSensitiveDataConsents: []byte{
-					0, 0,
+				GPCSegment: sections.CommonUSGPCSegment{
+					SubsectionType: 1,
+					Gpc:            false,
 				},
-				PersonalDataConsents:    0,
-				MspaCoveredTransaction:  2,
-				MspaOptOutOptionMode:    1,
-				MspaServiceProviderMode: 2,
-			},
-			GPCSegment: sections.CommonUSGPCSegment{
-				SubsectionType: 1,
-				Gpc:            false,
-			},
-			SectionID: constants.SectionUSPCA,
-			Value:     "BlgWEYCY.QA"},
+				SectionID: constants.SectionUSPCA,
+				Value:     "BlgWEYCY.QA"},
 			uspva.USPVA{
 				CoreSegment: sections.CommonUSCoreSegment{
 					Version:                         1,
@@ -71,138 +72,143 @@ var testData = []gppEncodeTestData{
 	{
 		description: "USPVA GPP string encoding",
 		expected:    "DBABRg~bSFgmiU",
-		sections: []Section{uspva.USPVA{
-			CoreSegment: sections.CommonUSCoreSegment{
-				Version:                         27,
-				SharingNotice:                   1,
-				SaleOptOutNotice:                0,
-				TargetedAdvertisingOptOutNotice: 2,
-				SaleOptOut:                      0,
-				TargetedAdvertisingOptOut:       1,
-				SensitiveDataProcessing: []byte{
-					1, 2, 0, 0, 2, 1, 2, 2,
+		sections: []Section{
+			uspva.USPVA{
+				CoreSegment: sections.CommonUSCoreSegment{
+					Version:                         27,
+					SharingNotice:                   1,
+					SaleOptOutNotice:                0,
+					TargetedAdvertisingOptOutNotice: 2,
+					SaleOptOut:                      0,
+					TargetedAdvertisingOptOut:       1,
+					SensitiveDataProcessing: []byte{
+						1, 2, 0, 0, 2, 1, 2, 2,
+					},
+					KnownChildSensitiveDataConsents: []byte{0},
+					MspaCoveredTransaction:          2,
+					MspaOptOutOptionMode:            1,
+					MspaServiceProviderMode:         1,
 				},
-				KnownChildSensitiveDataConsents: []byte{0},
-				MspaCoveredTransaction:          2,
-				MspaOptOutOptionMode:            1,
-				MspaServiceProviderMode:         1,
-			},
-			SectionID: constants.SectionUSPVA,
-			Value:     "bSFgmiU"},
+				SectionID: constants.SectionUSPVA,
+				Value:     "bSFgmiU"},
 		},
 	},
 	{
 		description: "USPCO GPP string encoding",
 		expected:    "DBABJg~bSFgmJQ.YA",
-		sections: []Section{uspco.USPCO{
-			CoreSegment: sections.CommonUSCoreSegment{
-				Version:                         27,
-				SharingNotice:                   1,
-				SaleOptOutNotice:                0,
-				TargetedAdvertisingOptOutNotice: 2,
-				SaleOptOut:                      0,
-				TargetedAdvertisingOptOut:       1,
-				SensitiveDataProcessing: []byte{
-					1, 2, 0, 0, 2, 1, 2,
+		sections: []Section{
+			uspco.USPCO{
+				CoreSegment: sections.CommonUSCoreSegment{
+					Version:                         27,
+					SharingNotice:                   1,
+					SaleOptOutNotice:                0,
+					TargetedAdvertisingOptOutNotice: 2,
+					SaleOptOut:                      0,
+					TargetedAdvertisingOptOut:       1,
+					SensitiveDataProcessing: []byte{
+						1, 2, 0, 0, 2, 1, 2,
+					},
+					KnownChildSensitiveDataConsents: []byte{0},
+					MspaCoveredTransaction:          2,
+					MspaOptOutOptionMode:            1,
+					MspaServiceProviderMode:         1,
 				},
-				KnownChildSensitiveDataConsents: []byte{0},
-				MspaCoveredTransaction:          2,
-				MspaOptOutOptionMode:            1,
-				MspaServiceProviderMode:         1,
-			},
-			GPCSegment: sections.CommonUSGPCSegment{
-				SubsectionType: 1,
-				Gpc:            true,
-			},
-			SectionID: constants.SectionUSPCO,
-			Value:     "bSFgmJQ.YA"},
+				GPCSegment: sections.CommonUSGPCSegment{
+					SubsectionType: 1,
+					Gpc:            true,
+				},
+				SectionID: constants.SectionUSPCO,
+				Value:     "bSFgmJQ.YA"},
 		},
 	},
 	{
 		description: "USPCT GPP string encoding",
 		expected:    "DBABVg~bSFgmSZQ.YA",
-		sections: []Section{uspct.USPCT{
-			CoreSegment: sections.CommonUSCoreSegment{
-				Version:                         27,
-				SharingNotice:                   1,
-				SaleOptOutNotice:                0,
-				TargetedAdvertisingOptOutNotice: 2,
-				SaleOptOut:                      0,
-				TargetedAdvertisingOptOut:       1,
-				SensitiveDataProcessing: []byte{
-					1, 2, 0, 0, 2, 1, 2, 1,
+		sections: []Section{
+			uspct.USPCT{
+				CoreSegment: sections.CommonUSCoreSegment{
+					Version:                         27,
+					SharingNotice:                   1,
+					SaleOptOutNotice:                0,
+					TargetedAdvertisingOptOutNotice: 2,
+					SaleOptOut:                      0,
+					TargetedAdvertisingOptOut:       1,
+					SensitiveDataProcessing: []byte{
+						1, 2, 0, 0, 2, 1, 2, 1,
+					},
+					KnownChildSensitiveDataConsents: []byte{
+						0, 2, 1,
+					},
+					MspaCoveredTransaction:  2,
+					MspaOptOutOptionMode:    1,
+					MspaServiceProviderMode: 1,
 				},
-				KnownChildSensitiveDataConsents: []byte{
-					0, 2, 1,
+				GPCSegment: sections.CommonUSGPCSegment{
+					SubsectionType: 1,
+					Gpc:            true,
 				},
-				MspaCoveredTransaction:  2,
-				MspaOptOutOptionMode:    1,
-				MspaServiceProviderMode: 1,
-			},
-			GPCSegment: sections.CommonUSGPCSegment{
-				SubsectionType: 1,
-				Gpc:            true,
-			},
-			SectionID: constants.SectionUSPCT,
-			Value:     "bSFgmSZQ.YA"},
+				SectionID: constants.SectionUSPCT,
+				Value:     "bSFgmSZQ.YA"},
 		},
 	},
 	{
 		description: "USPNAT GPP string encoding",
 		expected:    "DBABLA~DSJgmkoZJSA.YA",
-		sections: []Section{uspnat.USPNAT{
-			CoreSegment: uspnat.USPNATCoreSegment{
-				Version:                             3,
-				SharingNotice:                       1,
-				SaleOptOutNotice:                    0,
-				SharingOptOutNotice:                 2,
-				TargetedAdvertisingOptOutNotice:     0,
-				SensitiveDataProcessingOptOutNotice: 2,
-				SensitiveDataLimitUseNotice:         1,
-				SaleOptOut:                          2,
-				SharingOptOut:                       0,
-				TargetedAdvertisingOptOut:           0,
-				SensitiveDataProcessing: []byte{
-					2, 1, 2, 2, 1, 0, 2, 2, 0, 1, 2, 1,
+		sections: []Section{
+			uspnat.USPNAT{
+				CoreSegment: uspnat.USPNATCoreSegment{
+					Version:                             3,
+					SharingNotice:                       1,
+					SaleOptOutNotice:                    0,
+					SharingOptOutNotice:                 2,
+					TargetedAdvertisingOptOutNotice:     0,
+					SensitiveDataProcessingOptOutNotice: 2,
+					SensitiveDataLimitUseNotice:         1,
+					SaleOptOut:                          2,
+					SharingOptOut:                       0,
+					TargetedAdvertisingOptOut:           0,
+					SensitiveDataProcessing: []byte{
+						2, 1, 2, 2, 1, 0, 2, 2, 0, 1, 2, 1,
+					},
+					KnownChildSensitiveDataConsents: []byte{
+						0, 2,
+					},
+					PersonalDataConsents:    1,
+					MspaCoveredTransaction:  1,
+					MspaOptOutOptionMode:    0,
+					MspaServiceProviderMode: 2,
 				},
-				KnownChildSensitiveDataConsents: []byte{
-					0, 2,
+				GPCSegment: sections.CommonUSGPCSegment{
+					SubsectionType: 1,
+					Gpc:            true,
 				},
-				PersonalDataConsents:    1,
-				MspaCoveredTransaction:  1,
-				MspaOptOutOptionMode:    0,
-				MspaServiceProviderMode: 2,
-			},
-			GPCSegment: sections.CommonUSGPCSegment{
-				SubsectionType: 1,
-				Gpc:            true,
-			},
-			SectionID: constants.SectionUSPNAT,
-			Value:     "DSJgmkoZJSA.YA"},
+				SectionID: constants.SectionUSPNAT,
+				Value:     "DSJgmkoZJSA.YA"},
 		},
 	},
 	{
 		description: "USPUT GPP string encoding",
 		expected:    "DBADLO8~BSJgmkoZJSA.YA~BSFgmiU~BWJYJllA~BSFgmSZQ.YA",
-		sections: []Section{usput.USPUT{
-			CoreSegment: usput.USPUTCoreSegment{
-				Version:                             1,
-				SharingNotice:                       1,
-				SaleOptOutNotice:                    1,
-				TargetedAdvertisingOptOutNotice:     2,
-				SensitiveDataProcessingOptOutNotice: 0,
-				SaleOptOut:                          2,
-				TargetedAdvertisingOptOut:           1,
-				SensitiveDataProcessing: []byte{
-					1, 2, 0, 0, 2, 1, 2, 1,
+		sections: []Section{
+			usput.USPUT{
+				CoreSegment: usput.USPUTCoreSegment{
+					Version:                             1,
+					SharingNotice:                       1,
+					SaleOptOutNotice:                    1,
+					TargetedAdvertisingOptOutNotice:     2,
+					SensitiveDataProcessingOptOutNotice: 0,
+					SaleOptOut:                          2,
+					TargetedAdvertisingOptOut:           1,
+					SensitiveDataProcessing: []byte{
+						1, 2, 0, 0, 2, 1, 2, 1,
+					},
+					KnownChildSensitiveDataConsents: 1,
+					MspaCoveredTransaction:          2,
+					MspaOptOutOptionMode:            1,
+					MspaServiceProviderMode:         1,
 				},
-				KnownChildSensitiveDataConsents: 1,
-				MspaCoveredTransaction:          2,
-				MspaOptOutOptionMode:            1,
-				MspaServiceProviderMode:         1,
-			},
-			SectionID: constants.SectionUSPUT,
-			Value:     "BWJYJllA"},
+				SectionID: constants.SectionUSPUT,
+				Value:     "BWJYJllA"},
 			uspnat.USPNAT{
 				CoreSegment: uspnat.USPNATCoreSegment{
 					Version:                             1,

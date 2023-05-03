@@ -1,6 +1,7 @@
 package gpp
 
 import (
+	"errors"
 	"fmt"
 	"github.com/prebid/go-gpp/constants"
 	"github.com/prebid/go-gpp/util"
@@ -15,7 +16,7 @@ const (
 )
 
 var (
-	duplicatedSectionErr = fmt.Errorf("duplicated sections")
+	duplicatedSectionErr = errors.New("duplicated sections")
 )
 
 func Encode(sections []Section) (string, error) {
@@ -53,8 +54,8 @@ func Encode(sections []Section) (string, error) {
 	builder.Write(bs.Base64Encode())
 
 	for _, sec := range sections {
-		// TODO: add a parameter to decide whether a GPC segment should be included.
 		builder.WriteByte('~')
+		// By default, GPP is included.
 		builder.Write(sec.Encode(true))
 	}
 

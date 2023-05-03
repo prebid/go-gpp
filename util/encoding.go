@@ -2,13 +2,13 @@ package util
 
 import (
 	"encoding/base64"
-	"fmt"
+	"errors"
 	"unsafe"
 )
 
 var (
-	fibEncodeNumOutOfRangeErr = fmt.Errorf("the number to be encoded is out of range")
-	fibEncodeInvalidRange     = fmt.Errorf("the range is invalid")
+	fibEncodeNumOutOfRangeErr = errors.New("the number to be encoded is out of range")
+	fibEncodeInvalidRange     = errors.New("the range is invalid")
 )
 
 func getByteSlice() []byte {
