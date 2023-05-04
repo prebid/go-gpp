@@ -20,7 +20,9 @@ func NewBitStreamForWrite() *BitStream {
 	return NewBitStream(getByteSlice())
 }
 
-// enlarge enlarges the underlying byte slice.
+// enlarge the underlying byte slice.
+// In short, if the final size is less than the expThreshold, double the size of the underlying byte array,
+// otherwise, enlarge the size of the array by a specified step.
 func (bs *BitStream) enlarge(n uint16) {
 	final := int(bs.p+n+7) / 8
 	// Under most circumstances, the value of final will hit this if condition.
@@ -99,7 +101,7 @@ func (bs *BitStream) WriteByte6(b byte) {
 	bs.appendNBits([]byte{b << 2}, 6)
 }
 
-// WriteByte8 .
+// WriteByte8 writes a full byte b into the BitStream.
 func (bs *BitStream) WriteByte8(b byte) {
 	bs.appendNBits([]byte{b}, 8)
 }
@@ -113,21 +115,49 @@ func (bs *BitStream) WriteUInt12(b uint16) {
 	bs.appendNBits([]byte{first, second}, 12)
 }
 
-// WriteUInt16 .
+// WriteUInt16 writes a full uint16 (two bytes) into the BitStream.
 func (bs *BitStream) WriteUInt16(b uint16) {
 	first := byte(b >> 8)
 	second := byte(b)
 	bs.appendNBits([]byte{first, second}, 16)
 }
 
-// WriteTwoBitField .
+// WriteTwoBitField encapsulates WriteByte2 to get convenience to some extent, when encoding GPP strings.
 func (bs *BitStream) WriteTwoBitField(bList []byte) {
 	for _, b := range bList {
 		bs.WriteByte2(b)
 	}
 }
 
-// WriteFibonacciInt .
+/*
+	WriteFibonacciInt writes int based on Fibonacci Coding https://en.wikipedia.org/wiki/Fibonacci_coding.
+
+By definition, Fibonacci numbers are numbers that are the sum of the two Fibonacci numbers that come before.
+The numbers are [excluding 0, 1,] 1 (0+1), 2 (1+1), 3 (1+2), 5 (2+3), 8 (3+5), etc. All of the integers that
+are larger and equal to 0 are able to split into a combination of at least one Fibonacci numbers. For instance,
+6 refers to 1+5, while 7 refers to 2+5, where 1, 2, 5 are Fibonacci numbers.
+
+To encode an integer using Fibonacci Coding, just follow these steps:
+1.Find the largest Fibonacci number equal to or less than N; subtract this number from N, keeping track of the remainder.
+2.If the number subtracted was the i-th Fibonacci number F(i), put a 1 in place i−2 in the code word (counting the left-most digit as place 0).
+3.Repeat the previous steps, substituting the remainder for N, until a remainder of 0 is reached.
+4.Place an additional 1 after the rightmost digit in the code word.
+
+So a Fibonacci encoded bit sequence is all about marking the corresponding bit as 1 while leaving the others as 0.
+Here are some examples:
+
+	FibonacciInt(1) = 11			1-> (1*1)->1
+	FibonacciInt(2) = 011 			2-> (1*1+2*1)->01
+	FibonacciInt(3) = 0011			3-> (1*0+2*0+3*1)->001
+	FibonacciInt(4) = 1011			4-> (1*1+2*0+3*1)->101
+	FibonacciInt(12) = 101011		12->(1*1+2*0+3*1+5*0+8*1)->10101
+
+According to the algorithm, no sequential ones can be found in the bit sequence, and the final bit is always a single 1,
+which makes it easy to extract several continuous Fibonacci encoded integers out from a bit stream if we
+place an additional 1 in the end, since 11 could be an end-of-sequence indicator. The advantage of this is,
+that a sequence of numbers can be encoded into a sequence of bits without the need to know the length of the
+bit sequences in advance.
+*/
 func (bs *BitStream) WriteFibonacciInt(num uint16) error {
 	// The num should be [1,6765). Actually once the num is larger than or equal to 987,
 	// the efficiency of Fibonacci Encoding would be no better than 'WriteUint16'.
@@ -170,7 +200,17 @@ func (bs *BitStream) WriteFibonacciInt(num uint16) error {
 	return nil
 }
 
-// WriteIntRange .
+/*
+WriteIntRange writes an IntRange object into the BitStream.
+
+The basic idea is 12 bits for size, 1 bit indicating if a range refers to a single number or not, followed by
+one or two Fibonacci encoded numbers, and then followed by other ranges fell behind.
+
+For example, an IntRange consisting of [1, 1], [3, 4] would be encoded into 000000000010 0 11 1 0011 11.
+There are two ranges, so the size is encoded into 000000000010. The first range [1, 1] refers to a single integer 1,
+so the indicator is 0, followed by Fibonacci encoded 1, while the next range [3, 4] refers to a range containing
+not only one integer, so the indicator is 1, followed by Fibonacci encoded 3 and 1 (4-3).
+*/
 func (bs *BitStream) WriteIntRange(intRange *IntRange) error {
 	var err error
 	bs.WriteUInt12(intRange.Size)
