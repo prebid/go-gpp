@@ -2,12 +2,12 @@ package gpp
 
 import (
 	"fmt"
-	"testing"
-
-	"github.com/revcontent-production/go-gpp/constants"
 	"github.com/revcontent-production/go-gpp/sections"
 	"github.com/revcontent-production/go-gpp/sections/uspca"
 	"github.com/revcontent-production/go-gpp/sections/uspva"
+	"testing"
+
+	"github.com/revcontent-production/go-gpp/constants"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -115,6 +115,29 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		"GPP-tcf-tcfca-usp": {
+			description: "GPP string with EU TCF v2, Canadian TCF and US Privacy",
+			gppString:   "DBACOe~CPrzpwAPrzpwAEXahAENC7CwAP_AAH_AACiQIgAB4C5GQCFDeHpdAJsUAAQDQMhAAKAgAAQFgYABCBoAAIwCAAAwAACCAAoCAAIAIABBAAEAAAAAAAEAQAAAAAEAAEAAAAAAIAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAyAAAAAIAEEAAAAACAAEAAAgAABAAAgAAAAAAAAAAAAAIAAAAAAAAAAAEEQIGAACwAKgAXAAyAByAEAAQgAkABkADQAHIAPIAfAB_AEQARQAmABPACkAF8AMQAZgA0AB-AEIAKMAUoAyIBlAGWAOeAdwB3gEDgIOAhABEQCLAE7AKCAU8AtIBdQDFAGvAOoAvMBkwDLAGfANVAfuBBQCIAAAA~CPrzpwAPrzpwAEXahAENC7CgAf-AAP-AAAiAAHgLkZAIUN4el0AmxQABANAyEAAoCAABAWBgAEIGgAAjAIAADAAAIIACgIAAgAgAEEAAQAAAAAAAQBAAAAAAQAAQAAAAAAgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAADIAAAAAgAQQAAAAAIAAQAACAAAEAACAAAAAAAAAAAAAAgAAAAAAAAAAAQRAgYAALAAqABcADIAHIAQABCACQAGQANAAcgA8gB8AH8ARABFACYAE8AKQAXwAxABmADQAH4AQgAowBSgDIgGUAZYA54B3AHeAQOAg4CEAERAIsATsAoIBTwC0gF1AMUAa8A6gC8wGTAMsAZ8A1UB-4EFAIgA~1-N-",
+			expected: GppContainer{
+				Version:      1,
+				SectionTypes: []constants.SectionID{2, 5, 6},
+				Sections: []Section{GenericSection{sectionID: 2,
+					value: "CPrzpwAPrzpwAEXahAENC7CwAP_AAH_AACiQIgAB4C5GQCFDeHpdAJsUAAQDQMhAAKAgAAQFgYABCBoAAIwCAAAwAACCAAoCAAIAIABBAAEAAAAAAAEAQAAAAAEAAEAAAAAAIAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAyAAAAAIAEEAAAAACAAEAAAgAABAAAgAAAAAAAAAAAAAIAAAAAAAAAAAEEQIGAACwAKgAXAAyAByAEAAQgAkABkADQAHIAPIAfAB_AEQARQAmABPACkAF8AMQAZgA0AB-AEIAKMAUoAyIBlAGWAOeAdwB3gEDgIOAhABEQCLAE7AKCAU8AtIBdQDFAGvAOoAvMBkwDLAGfANVAfuBBQCIAAAA"},
+					GenericSection{sectionID: 5,
+						value: "CPrzpwAPrzpwAEXahAENC7CgAf-AAP-AAAiAAHgLkZAIUN4el0AmxQABANAyEAAoCAABAWBgAEIGgAAjAIAADAAAIIACgIAAgAgAEEAAQAAAAAAAQBAAAAAAQAAQAAAAAAgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAADIAAAAAgAQQAAAAAIAAQAACAAAEAACAAAAAAAAAAAAAAgAAAAAAAAAAAQRAgYAALAAqABcADIAHIAQABCACQAGQANAAcgA8gB8AH8ARABFACYAE8AKQAXwAxABmADQAH4AQgAowBSgDIgGUAZYA54B3AHeAQOAg4CEAERAIsATsAoIBTwC0gF1AMUAa8A6gC8wGTAMsAZ8A1UB-4EFAIgA"},
+					GenericSection{sectionID: 6,
+						value: "1-N-"}},
+			},
+		},
+		"GPP-empty": {
+			description: "GPP string no data",
+			gppString:   "DBAA",
+			expected: GppContainer{
+				Version:      1,
+				SectionTypes: []constants.SectionID{},
+				Sections:     []Section{},
+			},
+		},
 		"GPP-tcf-error": {
 			description: "GPP string with EU TCF V2",
 			gppString:   "DBGBMA~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
@@ -124,7 +147,7 @@ func TestParse(t *testing.T) {
 				Sections: []Section{GenericSection{sectionID: 2,
 					value: "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"}},
 			},
-			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 4 of Integer(Fibonacci): expected 1 bit at bit 32, but the byte array was only 4 bytes long")},
+			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 12 of Integer(Fibonacci): expected 1 bit at bit 40, but the byte array was only 5 bytes long")},
 		},
 		"GPP-uspca-error": {
 			description:   "GPP string with USPCA",

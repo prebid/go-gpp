@@ -5,6 +5,7 @@ type SectionID int
 const (
 	SectionTCFEU2 SectionID = 2
 	SectionGPP    SectionID = 3
+	SectionTCFCA  SectionID = 5
 	SectionUSPV1  SectionID = 6
 	SectionUSPNAT SectionID = 7
 	SectionUSPCA  SectionID = 8
@@ -17,6 +18,8 @@ const (
 var SectionNamesByID = map[int]string{
 	2:  "tcfeu2",
 	3:  "gpp header",
+	4:  "gpp signal integrity",
+	5:  "tcfca",
 	6:  "uspv1",
 	7:  "uspnat",
 	8:  "uspca",

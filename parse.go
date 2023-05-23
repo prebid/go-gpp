@@ -35,7 +35,17 @@ func Parse(v string) (GppContainer, []error) {
 
 	sectionStrings := strings.Split(v, "~")
 
-	bs, err := util.NewBitStreamFromBase64(sectionStrings[0])
+	// IAB's base64 conversion means a 6 bit grouped value can be converted to 8 bit bytes.
+	// Any leftover bits <8 would be skipped in normal base64 decoding.
+	// Therefore, pad with 6 '0's w/ `A` to ensure that all bits are decoded into bytes.
+	headerString := sectionStrings[0]
+	for {
+		headerString += "A"
+		if len(headerString) >= 6 {
+			break
+		}
+	}
+	bs, err := util.NewBitStreamFromBase64(headerString)
 	if err != nil {
 		return gpp, []error{fmt.Errorf("error parsing GPP header, base64 decoding: %s", err)}
 	}
