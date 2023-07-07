@@ -337,7 +337,7 @@ func TestEncode2(t *testing.T) {
 }
 
 // go test -bench="^BenchmarkEncode$" -benchmem .
-// BenchmarkEncode-8         845827              1389 ns/op             472 B/op         27 allocs/op (Apple M1 Pro)
+// BenchmarkEncode-8         845827              1301 ns/op             472 B/op         27 allocs/op (Apple M1 Pro)
 func BenchmarkEncode(b *testing.B) {
 	secSet := map[constants.SectionID]Section{}
 	for i := 0; i < len(testData); i++ {

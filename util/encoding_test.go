@@ -14,6 +14,55 @@ func prepareNBits(data []byte, pointer, n int) (dataToWrite uint16) {
 	return dataToWrite
 }
 
+func TestEnlarge(t *testing.T) {
+	testCases := []struct {
+		name   string
+		bytes  []byte
+		n      uint16
+		expect int
+	}{
+		{
+			name:   "test_no_exceed",
+			bytes:  make([]byte, 3, 8),
+			n:      3,
+			expect: 8,
+		},
+		{
+			name:   "test_no_exceed_boundary",
+			bytes:  make([]byte, 3, 8),
+			n:      5,
+			expect: 8,
+		},
+		{
+			name:   "test_exceed_doubling",
+			bytes:  make([]byte, 3, 8),
+			n:      6,
+			expect: 16,
+		},
+		{
+			name:   "test_exceed_quartering",
+			bytes:  make([]byte, 33, 33),
+			n:      1,
+			expect: 33 + 33/4,
+		},
+		{
+			name:   "test_exceed_direct_set",
+			bytes:  make([]byte, 0, 3),
+			n:      9,
+			expect: 9,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			bs := NewBitStream(tc.bytes)
+			bs.p = uint16(len(tc.bytes)) * 8
+			bs.enlarge(tc.n * 8)
+			assert.Equal(t, tc.expect, cap(bs.b))
+		})
+	}
+}
+
 func TestWriteByte1(t *testing.T) {
 	testCases := []struct {
 		name string

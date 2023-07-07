@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/base64"
 	"errors"
-	"unsafe"
 )
 
 var (
@@ -21,8 +20,8 @@ func NewBitStreamForWrite() *BitStream {
 }
 
 // enlarge the underlying byte slice.
-// In short, if the final size is less than the expThreshold, double the size of the underlying byte array,
-// otherwise, enlarge the size of the array by a specified step.
+// This function assumes bs.p always points to the end of the stream.
+// Do NOT attempt to modify the bs.p while applying this method.
 func (bs *BitStream) enlarge(n uint16) {
 	final := int(bs.p+n+7) / 8
 	// Under most circumstances, the value of final will hit this if condition.
@@ -31,23 +30,18 @@ func (bs *BitStream) enlarge(n uint16) {
 		return
 	}
 
-	const expThreshold = 64
-	const step = 16
-	var temp []byte
-
-	if final <= expThreshold {
-		finalF := float32(final - 1)
-		// Find out the leftmost one's position.
-		pos := *(*int)(unsafe.Pointer(&finalF))>>23&255 - 127
-		size := 1
-		if pos >= 0 {
-			size = 1 << (pos + 1)
-		}
-		temp = make([]byte, final, size)
+	newCap := cap(bs.b)
+	doubleCap := newCap + newCap
+	if final > doubleCap {
+		newCap = final
 	} else {
-		size := (final-expThreshold+step-1)/step*step + expThreshold
-		temp = make([]byte, final, size)
+		if newCap < 32 {
+			newCap = doubleCap
+		} else {
+			newCap += newCap / 4
+		}
 	}
+	temp := make([]byte, final, newCap)
 	copy(temp, bs.b)
 	bs.b = temp
 }
@@ -161,7 +155,7 @@ bit sequences in advance.
 func (bs *BitStream) WriteFibonacciInt(num uint16) error {
 	// The num should be [1,6765). Actually once the num is larger than or equal to 987,
 	// the efficiency of Fibonacci Encoding would be no better than 'WriteUint16'.
-	if num <= 0 || num >= fibonacci(fibLen) {
+	if num <= 0 || num >= fibLookup[fibLen-1]+fibLookup[fibLen-2] {
 		return fibEncodeNumOutOfRangeErr
 	}
 	// Binary Search to find the largest fibonacci number less than or equal to num.
