@@ -38,7 +38,9 @@ func (bs *BitStream) enlarge(n uint16) {
 		if newCap < 32 {
 			newCap = doubleCap
 		} else {
-			newCap += newCap / 4
+			for newCap < final {
+				newCap += newCap / 4
+			}
 		}
 	}
 	temp := make([]byte, final, newCap)

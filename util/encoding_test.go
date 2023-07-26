@@ -40,16 +40,28 @@ func TestEnlarge(t *testing.T) {
 			expect: 16,
 		},
 		{
-			name:   "test_exceed_quartering",
+			name:   "test_exceed_quartering_1",
 			bytes:  make([]byte, 33, 33),
 			n:      1,
 			expect: 33 + 33/4,
+		},
+		{
+			name:   "test_exceed_quartering_2",
+			bytes:  make([]byte, 40, 40),
+			n:      30,
+			expect: 77,
 		},
 		{
 			name:   "test_exceed_direct_set",
 			bytes:  make([]byte, 0, 3),
 			n:      9,
 			expect: 9,
+		},
+		{
+			name:   "test_expand_zero",
+			bytes:  make([]byte, 0, 0),
+			n:      0,
+			expect: 0,
 		},
 	}
 
