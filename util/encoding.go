@@ -164,11 +164,15 @@ func (bs *BitStream) WriteFibonacciInt(num uint16) error {
 	lo, hi := 2, fibLen-1
 	for lo < hi {
 		mid := (lo + hi) / 2
-		if num >= fibonacci(mid) && num < fibonacci(mid+1) {
+		// Since lo < hi and hi is at most equal to fibLen-1,
+		// the largest lo+hi is (fibLen-2 + fibLen-1),
+		// the largest mid should be fibLen-2 ((2*fibLen-3)/2 => [2*(fibLen-1)-1]/2 => fibLen-2),
+		// the mid+1 will never be larger than fibLen-1 and an index of mid+1 is safe here.
+		if num >= fibLookup[mid] && num < fibLookup[mid+1] {
 			lo = mid
 			break
 		}
-		if num < fibonacci(mid) {
+		if num < fibLookup[mid] {
 			hi = mid - 1
 		} else {
 			lo = mid + 1
