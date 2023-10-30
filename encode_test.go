@@ -17,6 +17,7 @@ type gppEncodeTestData struct {
 	description string
 	sections    []Section
 	expected    string
+	err         error
 }
 
 var testData = []gppEncodeTestData{
@@ -187,7 +188,7 @@ var testData = []gppEncodeTestData{
 		},
 	},
 	{
-		description: "USPUT GPP string encoding",
+		description: "GPP string encoding for multiple sections",
 		expected:    "DBADLO8~BSJgmkoZJSA.YA~BSFgmiU~BWJYJllA~BSFgmSZQ.YA",
 		sections: []Section{
 			usput.USPUT{
@@ -282,14 +283,29 @@ var testData = []gppEncodeTestData{
 				Value:     "BSFgmiU"},
 		},
 	},
+	{
+		description: "GPP string encoding minimum section ID",
+		expected:    "DBABYA~test_minimum",
+		sections:    []Section{GenericSection{sectionID: 1, value: "test_minimum"}},
+	},
+	{
+		description: "GPP string encoding section ID zero",
+		expected:    "",
+		sections:    []Section{GenericSection{sectionID: 0, value: "section_with_id_zero"}},
+		err:         sectionIdOutOfRangeErr,
+	},
 }
 
 func TestEncode(t *testing.T) {
 	for _, test := range testData {
 		result, err := Encode(test.sections)
 
-		assert.Nil(t, err)
+		assert.Equal(t, test.err, err)
 		assert.Equal(t, test.expected, result)
+
+		if err != nil {
+			continue
+		}
 		// Parse result to see whether the GPP string can be translated back into the original sections.
 		container, errs := Parse(result)
 		if len(errs) != 0 {
