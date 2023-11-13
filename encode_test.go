@@ -66,7 +66,7 @@ var testData = []gppEncodeTestData{
 					MspaOptOutOptionMode:            1,
 					MspaServiceProviderMode:         1,
 				},
-				SectionID: 9,
+				SectionID: constants.SectionUSPVA,
 				Value:     "BSFgmiU"},
 		},
 	},

@@ -11,7 +11,7 @@ var (
 )
 
 func getByteSlice() []byte {
-	// Most string to be encoded are less than 8 bytes.
+	// Most strings to be encoded are less than 8 bytes.
 	return make([]byte, 0, 8)
 }
 

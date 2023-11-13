@@ -110,7 +110,7 @@ func TestParse(t *testing.T) {
 						MspaOptOutOptionMode:            1,
 						MspaServiceProviderMode:         1,
 					},
-					SectionID: 9,
+					SectionID: constants.SectionUSPVA,
 					Value:     "bSFgmiU"},
 				},
 			},
