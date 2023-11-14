@@ -18,7 +18,7 @@ func TestUSPCA(t *testing.T) {
 	testData := []uspcaTestData{
 		{
 			description: "should populate USPCA segments correctly",
-			gppString:   "xlgWEYCZAA.YAAA",
+			gppString:   "xlgWEYCY.YA",
 			/*
 				110001 10 01 01 10 00 000101100001000110 0000 00 10 01 10 01 0 011
 			*/
@@ -46,17 +46,19 @@ func TestUSPCA(t *testing.T) {
 					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPCA,
-				Value:     "xlgWEYCZAA.YAAA",
+				Value:     "xlgWEYCY.YA",
 			},
 		},
 	}
 
 	for _, test := range testData {
 		result, err := NewUSPCA(test.gppString)
+		encodedString := string(test.expected.Encode(true))
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
 		assert.Equal(t, constants.SectionUSPCA, result.GetID())
 		assert.Equal(t, test.gppString, result.GetValue())
+		assert.Equal(t, test.gppString, encodedString)
 	}
 }

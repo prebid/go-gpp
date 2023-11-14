@@ -38,6 +38,12 @@ func NewUSPVA(encoded string) (USPVA, error) {
 	return uspva, nil
 }
 
+func (uspva USPVA) Encode(bool) []byte {
+	bs := util.NewBitStreamForWrite()
+	uspva.CoreSegment.Encode(bs)
+	return bs.Base64Encode()
+}
+
 func (uspva USPVA) GetID() constants.SectionID {
 	return uspva.SectionID
 }

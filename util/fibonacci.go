@@ -3,7 +3,7 @@ package util
 import "fmt"
 
 // Preload the smaller, more common, fibonacci values to speed up lookups.
-var fibLookup [20]uint16 = [20]uint16{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181}
+var fibLookup = [fibLen]uint16{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181}
 
 const fibLen int = 20
 

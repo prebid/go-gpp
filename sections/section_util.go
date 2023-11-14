@@ -96,6 +96,20 @@ func NewCommonUSCoreSegment(sensitiveDataFields int, knownChildDataFields int, b
 	return commonUSCore, nil
 }
 
+func (segment CommonUSCoreSegment) Encode(bs *util.BitStream) {
+	bs.WriteByte6(segment.Version)
+	bs.WriteByte2(segment.SharingNotice)
+	bs.WriteByte2(segment.SaleOptOutNotice)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOutNotice)
+	bs.WriteByte2(segment.SaleOptOut)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOut)
+	bs.WriteTwoBitField(segment.SensitiveDataProcessing)
+	bs.WriteTwoBitField(segment.KnownChildSensitiveDataConsents)
+	bs.WriteByte2(segment.MspaCoveredTransaction)
+	bs.WriteByte2(segment.MspaOptOutOptionMode)
+	bs.WriteByte2(segment.MspaServiceProviderMode)
+}
+
 func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	var commonUSGPC CommonUSGPCSegment
 	var err error
@@ -116,6 +130,15 @@ func NewCommonUSGPCSegment(bs *util.BitStream) (CommonUSGPCSegment, error) {
 	commonUSGPC.Gpc = (gpc == 1)
 
 	return commonUSGPC, nil
+}
+
+func (gpc CommonUSGPCSegment) Encode(bs *util.BitStream) {
+	bs.WriteByte2(gpc.SubsectionType)
+	if gpc.Gpc {
+		bs.WriteByte1(1)
+	} else {
+		bs.WriteByte1(0)
+	}
 }
 
 func CreateBitStreams(encoded string, gpcCheck bool) (*util.BitStream, *util.BitStream, error) {

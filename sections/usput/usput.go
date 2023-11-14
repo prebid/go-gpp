@@ -94,6 +94,21 @@ func NewUPSUTCoreSegment(bs *util.BitStream) (USPUTCoreSegment, error) {
 	return usputCore, nil
 }
 
+func (segment USPUTCoreSegment) Encode(bs *util.BitStream) {
+	bs.WriteByte6(segment.Version)
+	bs.WriteByte2(segment.SharingNotice)
+	bs.WriteByte2(segment.SaleOptOutNotice)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOutNotice)
+	bs.WriteByte2(segment.SensitiveDataProcessingOptOutNotice)
+	bs.WriteByte2(segment.SaleOptOut)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOut)
+	bs.WriteTwoBitField(segment.SensitiveDataProcessing)
+	bs.WriteByte2(segment.KnownChildSensitiveDataConsents)
+	bs.WriteByte2(segment.MspaCoveredTransaction)
+	bs.WriteByte2(segment.MspaOptOutOptionMode)
+	bs.WriteByte2(segment.MspaServiceProviderMode)
+}
+
 func NewUSPUT(encoded string) (USPUT, error) {
 	usput := USPUT{}
 
@@ -114,6 +129,12 @@ func NewUSPUT(encoded string) (USPUT, error) {
 	}
 
 	return usput, nil
+}
+
+func (usput USPUT) Encode(bool) []byte {
+	bs := util.NewBitStreamForWrite()
+	usput.CoreSegment.Encode(bs)
+	return bs.Base64Encode()
 }
 
 func (usput USPUT) GetID() constants.SectionID {

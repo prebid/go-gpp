@@ -110,7 +110,7 @@ func TestParse(t *testing.T) {
 						MspaOptOutOptionMode:            1,
 						MspaServiceProviderMode:         1,
 					},
-					SectionID: 9,
+					SectionID: constants.SectionUSPVA,
 					Value:     "bSFgmiU"},
 				},
 			},
@@ -144,5 +144,17 @@ func TestParse(t *testing.T) {
 				assert.Equal(t, test.expectedError, err)
 			}
 		})
+	}
+}
+
+// go test -bench="^BenchmarkParse$" -benchmem .
+// BenchmarkParse-8          625084              1912 ns/op            1472 B/op         48 allocs/op (Apple M1 Pro)
+func BenchmarkParse(b *testing.B) {
+	const gppString = "DBABrGA~DSJgmkoZJSA.YA~BlgWEYCY.QA~BSFgmiU~bSFgmJQ.YA~BWJYJllA~bSFgmSZQ.YA"
+	for i := 0; i < b.N; i++ {
+		_, err := Parse(gppString)
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }

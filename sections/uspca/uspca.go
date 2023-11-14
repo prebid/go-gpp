@@ -95,6 +95,21 @@ func NewUSPCACoreSegment(bs *util.BitStream) (USPCACoreSegment, error) {
 	return uspcaCore, err
 }
 
+func (segment USPCACoreSegment) Encode(bs *util.BitStream) {
+	bs.WriteByte6(segment.Version)
+	bs.WriteByte2(segment.SaleOptOutNotice)
+	bs.WriteByte2(segment.SharingOptOutNotice)
+	bs.WriteByte2(segment.SensitiveDataLimitUseNotice)
+	bs.WriteByte2(segment.SaleOptOut)
+	bs.WriteByte2(segment.SharingOptOut)
+	bs.WriteTwoBitField(segment.SensitiveDataProcessing)
+	bs.WriteTwoBitField(segment.KnownChildSensitiveDataConsents)
+	bs.WriteByte2(segment.PersonalDataConsents)
+	bs.WriteByte2(segment.MspaCoveredTransaction)
+	bs.WriteByte2(segment.MspaOptOutOptionMode)
+	bs.WriteByte2(segment.MspaServiceProviderMode)
+}
+
 func NewUSPCA(encoded string) (USPCA, error) {
 	uspca := USPCA{}
 
@@ -128,6 +143,19 @@ func NewUSPCA(encoded string) (USPCA, error) {
 	}
 
 	return uspca, nil
+}
+
+func (uspca USPCA) Encode(gpcIncluded bool) []byte {
+	bs := util.NewBitStreamForWrite()
+	uspca.CoreSegment.Encode(bs)
+	res := bs.Base64Encode()
+	if !gpcIncluded {
+		return res
+	}
+	bs.Reset()
+	res = append(res, '.')
+	uspca.GPCSegment.Encode(bs)
+	return append(res, bs.Base64Encode()...)
 }
 
 func (uspca USPCA) GetID() constants.SectionID {

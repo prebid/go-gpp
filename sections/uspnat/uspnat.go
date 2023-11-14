@@ -119,6 +119,25 @@ func NewUSPNATCoreSegment(bs *util.BitStream) (USPNATCoreSegment, error) {
 	return uspnatCore, nil
 }
 
+func (segment USPNATCoreSegment) Encode(bs *util.BitStream) {
+	bs.WriteByte6(segment.Version)
+	bs.WriteByte2(segment.SharingNotice)
+	bs.WriteByte2(segment.SaleOptOutNotice)
+	bs.WriteByte2(segment.SharingOptOutNotice)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOutNotice)
+	bs.WriteByte2(segment.SensitiveDataProcessingOptOutNotice)
+	bs.WriteByte2(segment.SensitiveDataLimitUseNotice)
+	bs.WriteByte2(segment.SaleOptOut)
+	bs.WriteByte2(segment.SharingOptOut)
+	bs.WriteByte2(segment.TargetedAdvertisingOptOut)
+	bs.WriteTwoBitField(segment.SensitiveDataProcessing)
+	bs.WriteTwoBitField(segment.KnownChildSensitiveDataConsents)
+	bs.WriteByte2(segment.PersonalDataConsents)
+	bs.WriteByte2(segment.MspaCoveredTransaction)
+	bs.WriteByte2(segment.MspaOptOutOptionMode)
+	bs.WriteByte2(segment.MspaServiceProviderMode)
+}
+
 func NewUSPNAT(encoded string) (USPNAT, error) {
 	uspnat := USPNAT{}
 
@@ -152,6 +171,19 @@ func NewUSPNAT(encoded string) (USPNAT, error) {
 	}
 
 	return uspnat, nil
+}
+
+func (uspnat USPNAT) Encode(gpcIncluded bool) []byte {
+	bs := util.NewBitStreamForWrite()
+	uspnat.CoreSegment.Encode(bs)
+	res := bs.Base64Encode()
+	if !gpcIncluded {
+		return res
+	}
+	bs.Reset()
+	res = append(res, '.')
+	uspnat.GPCSegment.Encode(bs)
+	return append(res, bs.Base64Encode()...)
 }
 
 func (uspnat USPNAT) GetID() constants.SectionID {

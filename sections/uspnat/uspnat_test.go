@@ -18,7 +18,7 @@ func TestUSPNAT(t *testing.T) {
 	testData := []uspnatTestData{
 		{
 			description: "should populate USPNAT segments correctly",
-			gppString:   "DSJgmkoZJSY.YAAA",
+			gppString:   "DSJgmkoZJSA.YA",
 			/*
 				000011 01 00 10 00 10 01 10 00 00 100110100100101000011001 0010 01 01 00 10 01 1 011
 			*/
@@ -50,17 +50,19 @@ func TestUSPNAT(t *testing.T) {
 					Gpc:            true,
 				},
 				SectionID: constants.SectionUSPNAT,
-				Value:     "DSJgmkoZJSY.YAAA",
+				Value:     "DSJgmkoZJSA.YA",
 			},
 		},
 	}
 
 	for _, test := range testData {
 		result, err := NewUSPNAT(test.gppString)
+		encodedString := string(test.expected.Encode(true))
 
 		assert.Nil(t, err)
 		assert.Equal(t, test.expected, result)
 		assert.Equal(t, constants.SectionUSPNAT, result.GetID())
 		assert.Equal(t, test.gppString, result.GetValue())
+		assert.Equal(t, test.gppString, encodedString)
 	}
 }
