@@ -16,16 +16,28 @@ func NewBitStream(b []byte) *BitStream {
 	return &BitStream{p: 0, b: b}
 }
 
-// NewBitStreamFromBase64 creates a new bit stream object from a base64 encoded string
+// NewBitStreamFromBase64 creates a new bit stream object from a base64-url encoded string
 func NewBitStreamFromBase64(encoded string) (*BitStream, error) {
-	buff := []byte(encoded)
+	buff := []byte(padLastQuantum(encoded))
 	decoded := make([]byte, base64.RawURLEncoding.DecodedLen(len(buff)))
 	n, err := base64.RawURLEncoding.Decode(decoded, buff)
 	if err != nil {
 		return nil, err
 	}
 	decoded = decoded[:n:n]
+
 	return NewBitStream(decoded), nil
+}
+
+// padLastQuantum pads the last quantum with zeros if it's incomplete to
+// ensure all bits are decoded using the standard base64 algorithm. The last
+// bits would otherwise be truncated down to the closest byte.
+func padLastQuantum(encoded string) string {
+	if (len(encoded) % 4) > 0 {
+		return encoded + "A" // pad with zeros
+	}
+
+	return encoded
 }
 
 // GetPosition reads out the position of the bit pointer in the bit stream
