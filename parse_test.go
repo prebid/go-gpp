@@ -20,7 +20,17 @@ type gppTestData struct {
 
 func TestParse(t *testing.T) {
 	testData := map[string]gppTestData{
-		"GPP-tcf": {
+		"gpp-tcf": {
+			description: "GPP string with EU TCF V2",
+			gppString:   "DBABM~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
+			expected: GppContainer{
+				Version:      1,
+				SectionTypes: []constants.SectionID{2},
+				Sections: []Section{GenericSection{sectionID: 2,
+					value: "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"}},
+			},
+		},
+		"gpp-tcf-valid-quantum": { // header is valid base64 quantum, should gracefully decode correctly
 			description: "GPP string with EU TCF V2",
 			gppString:   "DBABMA~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
 			expected: GppContainer{
@@ -30,9 +40,9 @@ func TestParse(t *testing.T) {
 					value: "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"}},
 			},
 		},
-		"GPP-tcv-usp": {
+		"gpp-tcf-usp": {
 			description: "GPP string with EU TCF v2 and US Privacy",
-			gppString:   "DBACNYA~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA~1YNN",
+			gppString:   "DBACNY~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA~1YNN",
 			expected: GppContainer{
 				Version:      1,
 				SectionTypes: []constants.SectionID{2, 6},
@@ -42,7 +52,7 @@ func TestParse(t *testing.T) {
 						value: "1YNN"}},
 			},
 		},
-		"GPP-tcfca-usp": {
+		"gpp-tcfca-usp": {
 			description: "GPP string with Canadian TCF and US Privacy",
 			gppString:   "DBABjw~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA~1YNN",
 			expected: GppContainer{
@@ -54,7 +64,7 @@ func TestParse(t *testing.T) {
 						value: "1YNN"}},
 			},
 		},
-		"GPP-uspca": {
+		"gpp-uspca": {
 			description: "GPP string with USPCA",
 			gppString:   "DBABBgA~xlgWEYCZAA",
 			expected: GppContainer{
@@ -88,7 +98,7 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
-		"GPP-uspva": {
+		"gpp-uspva": {
 			description: "GPP string with USPVA",
 			gppString:   "DBABRgA~bSFgmiU",
 			expected: GppContainer{
@@ -115,9 +125,9 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
-		"GPP-tcf-error": {
+		"gpp-tcf-error": {
 			description: "GPP string with EU TCF V2",
-			gppString:   "DBGBMA~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
+			gppString:   "DBGBM~CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA",
 			expected: GppContainer{
 				Version:      1,
 				SectionTypes: []constants.SectionID{2},
@@ -126,10 +136,10 @@ func TestParse(t *testing.T) {
 			},
 			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 4 of Integer(Fibonacci): expected 1 bit at bit 32, but the byte array was only 4 bytes long")},
 		},
-		"GPP-uspca-error": {
+		"gpp-uspca-error": {
 			description:   "GPP string with USPCA",
 			gppString:     "DBABBgA~xlgWE",
-			expectedError: []error{fmt.Errorf("error parsing uspca consent string: illegal base64 data at input byte 4")},
+			expectedError: []error{fmt.Errorf("error parsing uspca consent string: unable to set field CoreSegment.SensitiveDataProcessing due to parse error: expected 2 bits to start at bit 32, but the byte array was only 4 bytes long")},
 		},
 	}
 
