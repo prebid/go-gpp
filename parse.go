@@ -124,16 +124,16 @@ func Parse(v string) (GppContainer, []error) {
 // fastFailHeaderValidate performs quick validations of the header section before decoding
 // the bit stream.
 func fastFailHeaderValidate(h string) error {
-	// base64-url encodes 6 bits into each character. the first 6 bits of GPP header must always
-	// evaluate to the integer '3', so we can short cut by checking the first character directly.
-	if h[0] != SectionGPPByte {
-		return fmt.Errorf("error parsing GPP header, header must have type=%d", constants.SectionGPP)
-	}
-
 	// the GPP header must be at least 24 bits to represent the type, version, and a fibonacci sequence
 	// of at least 1 item. this requires at least 4 characters.
 	if len(h) < MinHeaderCharacters {
 		return fmt.Errorf("error parsing GPP header, should be at least %d bytes long", MinHeaderCharacters)
+	}
+
+	// base64-url encodes 6 bits into each character. the first 6 bits of GPP header must always
+	// evaluate to the integer '3', so we can short cut by checking the first character directly.
+	if h[0] != SectionGPPByte {
+		return fmt.Errorf("error parsing GPP header, header must have type=%d", constants.SectionGPP)
 	}
 
 	return nil
