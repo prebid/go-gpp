@@ -37,7 +37,7 @@ func Parse(v string) (GppContainer, []error) {
 	sectionStrings := strings.Split(v, "~")
 
 	header := sectionStrings[0]
-	if err := fastFailHeaderValidate(header); err != nil {
+	if err := failFastHeaderValidate(header); err != nil {
 		return gpp, []error{err}
 	}
 
@@ -121,9 +121,9 @@ func Parse(v string) (GppContainer, []error) {
 	return gpp, errs
 }
 
-// fastFailHeaderValidate performs quick validations of the header section before decoding
+// failFastHeaderValidate performs quick validations of the header section before decoding
 // the bit stream.
-func fastFailHeaderValidate(h string) error {
+func failFastHeaderValidate(h string) error {
 	// the GPP header must be at least 24 bits to represent the type, version, and a fibonacci sequence
 	// of at least 1 item. this requires at least 4 characters.
 	if len(h) < MinHeaderCharacters {
