@@ -165,17 +165,17 @@ func TestFailFastHeaderValidate(t *testing.T) {
 
 	t.Run("empty", func(t *testing.T) {
 		err := failFastHeaderValidate("")
-		assert.Error(t, err, "error parsing GPP header, should be at least 4 bytes long")
+		assert.EqualError(t, err, "error parsing GPP header, should be at least 4 bytes long")
 	})
 
 	t.Run("short", func(t *testing.T) {
 		err := failFastHeaderValidate("DB")
-		assert.Error(t, err, "error parsing GPP header, should be at least 4 bytes long")
+		assert.EqualError(t, err, "error parsing GPP header, should be at least 4 bytes long")
 	})
 
 	t.Run("invalid-type", func(t *testing.T) {
 		err := failFastHeaderValidate("AAAA")
-		assert.Error(t, err, "error parsing GPP header, should be at least 4 bytes long")
+		assert.EqualError(t, err, "error parsing GPP header, header must have type=3")
 	})
 }
 
