@@ -157,6 +157,28 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestFailFastHeaderValidate(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		err := failFastHeaderValidate("DBABM")
+		assert.NoError(t, err)
+	})
+
+	t.Run("empty", func(t *testing.T) {
+		err := failFastHeaderValidate("")
+		assert.EqualError(t, err, "error parsing GPP header, should be at least 4 bytes long")
+	})
+
+	t.Run("short", func(t *testing.T) {
+		err := failFastHeaderValidate("DB")
+		assert.EqualError(t, err, "error parsing GPP header, should be at least 4 bytes long")
+	})
+
+	t.Run("invalid-type", func(t *testing.T) {
+		err := failFastHeaderValidate("AAAA")
+		assert.EqualError(t, err, "error parsing GPP header, header must have type=3")
+	})
+}
+
 // go test -bench="^BenchmarkParse$" -benchmem .
 // BenchmarkParse-8          625084              1912 ns/op            1472 B/op         48 allocs/op (Apple M1 Pro)
 func BenchmarkParse(b *testing.B) {
