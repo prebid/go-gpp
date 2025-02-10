@@ -42,7 +42,6 @@ func Parse(v string) (GppContainer, []error) {
 	}
 
 	bs, err := util.NewBitStreamFromBase64(header)
-
 	if err != nil {
 		return gpp, []error{fmt.Errorf("error parsing GPP header, base64 decoding: %s", err)}
 	}
@@ -70,12 +69,8 @@ func Parse(v string) (GppContainer, []error) {
 			secIDs = append(secIDs, constants.SectionID(i))
 		}
 	}
-	//if len(secIDs) != secCount {
-	//	return gpp, []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)}
-	//}
-	if len(secIDs) < secCount && secCount > 0 {
-		secCount = len(secIDs)
-		secIDs = secIDs[0:secCount]
+	if len(secIDs) != secCount {
+		return gpp, []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)}
 	}
 	gpp.SectionTypes = secIDs
 

@@ -20,14 +20,6 @@ func NewUSPVA(encoded string) (USPVA, error) {
 		return uspva, err
 	}
 
-	// If length less than 40 then add padding
-	if bitStream.Len()*8 < 40 {
-		bitStream, err = util.NewBitStreamFromBase64(encoded + "A")
-		if err != nil {
-			return uspva, err
-		}
-	}
-
 	// NOTE: VA has only a single field in the KnownChildSensitiveDataConsents array. It otherwise
 	// matches the common core segment fields, so is being generated as a one element slice to keep
 	// it consistent with the majority of states. We would like to keep the code as common and

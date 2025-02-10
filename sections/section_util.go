@@ -149,9 +149,6 @@ func CreateBitStreams(encoded string, gpcCheck bool) (*util.BitStream, *util.Bit
 	}
 
 	coreBitStream, err := util.NewBitStreamFromBase64(segments[0])
-	if err == nil && coreBitStream.Len() < 6 {
-		coreBitStream, err = util.NewBitStreamFromBase64(segments[0] + "A")
-	}
 	if err != nil {
 		return nil, nil, err
 	}

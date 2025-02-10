@@ -117,14 +117,6 @@ func NewUSPUT(encoded string) (USPUT, error) {
 		return usput, err
 	}
 
-	// If length less than 42 then add padding
-	if bitStream.Len()*8 < 42 {
-		bitStream, err = util.NewBitStreamFromBase64(encoded + "A")
-		if err != nil {
-			return usput, err
-		}
-	}
-
 	coreSegment, err := NewUPSUTCoreSegment(bitStream)
 	if err != nil {
 		return usput, err

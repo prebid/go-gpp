@@ -2,12 +2,12 @@ package gpp
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/revcontent-production/go-gpp/constants"
 	"github.com/revcontent-production/go-gpp/sections"
 	"github.com/revcontent-production/go-gpp/sections/uspca"
 	"github.com/revcontent-production/go-gpp/sections/uspva"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -157,7 +157,7 @@ func TestParse(t *testing.T) {
 				Sections: []Section{GenericSection{sectionID: 2,
 					value: "CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA"}},
 			},
-			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 12 of Integer(Fibonacci): expected 1 bit at bit 40, but the byte array was only 5 bytes long")},
+			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 4 of Integer(Fibonacci): expected 1 bit at bit 32, but the byte array was only 4 bytes long")},
 		},
 		"gpp-uspca-error": {
 			description:   "GPP string with USPCA",
@@ -237,7 +237,6 @@ func TestParse2(t *testing.T) {
 	result, err := Parse("DBABRgA~bSFgmiU")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(result.Sections))
-
 	result, err = Parse("DBABFg~BVKAAAA")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(result.Sections))
