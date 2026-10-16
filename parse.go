@@ -62,15 +62,24 @@ func Parse(v string) (GppContainer, []error) {
 
 	// We do not count the GPP header as a section
 	secCount := len(sectionStrings) - 1
-	secIDs := make([]constants.SectionID, 0, secCount)
-
+	// Count the IDs before expanding the ranges: they come from the input, and a uint16 loop
+	// up to EndID 65535 would never terminate.
+	idCount := 0
 	for _, sec := range intRange.Range {
-		for i := sec.StartID; i <= sec.EndID; i++ {
+		if sec.EndID < sec.StartID {
+			return gpp, []error{fmt.Errorf("error parsing GPP header, invalid section ID range %d-%d", sec.StartID, sec.EndID)}
+		}
+		idCount += int(sec.EndID) - int(sec.StartID) + 1
+	}
+	if idCount != secCount {
+		return gpp, []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", idCount, secCount)}
+	}
+
+	secIDs := make([]constants.SectionID, 0, secCount)
+	for _, sec := range intRange.Range {
+		for i := int(sec.StartID); i <= int(sec.EndID); i++ {
 			secIDs = append(secIDs, constants.SectionID(i))
 		}
-	}
-	if len(secIDs) != secCount {
-		return gpp, []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found %d IDs, have %d sections", len(secIDs), secCount)}
 	}
 	gpp.SectionTypes = secIDs
 

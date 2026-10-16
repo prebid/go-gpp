@@ -27,6 +27,26 @@ var fibtestData = []testDefinition{
 	{[]byte{0x24, 0x87}, 8, 14, ""},          // (0010 0100) 1000 011(1)
 	{[]byte{0x58, 0x40, 0x8c}, 5, 1838, ""},  // (0101 1)000 0100 0000 1000 11(00)
 	{[]byte{0x08, 0x11, 0x1a}, 0, 12784, ""}, // 0000 1000 0001 0001 0001 1(010)
+	{[]byte{0x20, 0x4a, 0x0b}, 0, 65535, ""}, // 0010 0000 0100 1010 0000 1011
+}
+
+func TestReadFibonacciIntOverflow(t *testing.T) {
+	tests := map[string]struct {
+		data     []byte
+		expected string
+	}{
+		// 46368 (24) + 17711 (22) + 6765 (20) = 70844
+		"sum-over-uint16": {[]byte{0x00, 0x00, 0x2b}, "error reading bit 24 of Integer(Fibonacci): value exceeds 65535"},
+		// alternating bits never end the int and used to make fibonacci() run in exponential time
+		"no-terminator": {[]byte{0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55}, "error reading bit 25 of Integer(Fibonacci): value exceeds 65535"},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			bs := BitStream{b: test.data}
+			_, err := bs.ReadFibonacciInt()
+			assert.EqualError(t, err, test.expected)
+		})
+	}
 }
 
 func TestReadFibonnaciInt(t *testing.T) {

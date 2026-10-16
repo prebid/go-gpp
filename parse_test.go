@@ -136,6 +136,21 @@ func TestParse(t *testing.T) {
 			},
 			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(1): error reading bit 4 of Integer(Fibonacci): expected 1 bit at bit 32, but the byte array was only 4 bytes long")},
 		},
+		"gpp-section-range-to-max-id": {
+			description:   "GPP header with a section ID range 1-65535",
+			gppString:     "DBAB6AlBY~1YNN",
+			expectedError: []error{fmt.Errorf("error parsing GPP header, section IDs do not match the number of sections: found 65535 IDs, have 1 sections")},
+		},
+		"gpp-section-range-overflow": {
+			description:   "GPP header with a section ID range whose end overflows uint16",
+			gppString:     "DBABsgSgs~1YNN",
+			expectedError: []error{fmt.Errorf("error parsing GPP header, invalid section ID range 2-1")},
+		},
+		"gpp-section-id-no-terminator": {
+			description:   "GPP header with a Fibonacci section ID that never terminates",
+			gppString:     "DBABVVVVVVVVVVVV~1YNN",
+			expectedError: []error{fmt.Errorf("error parsing GPP header, section identifiers: error reading an int offset value in a Range(Fibonacci) entry(0): error reading bit 24 of Integer(Fibonacci): value exceeds 65535")},
+		},
 		"gpp-uspca-error": {
 			description:   "GPP string with USPCA",
 			gppString:     "DBABBgA~xlgWE",

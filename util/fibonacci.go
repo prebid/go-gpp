@@ -1,18 +1,28 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // Preload the smaller, more common, fibonacci values to speed up lookups.
 var fibLookup = [fibLen]uint16{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181}
 
 const fibLen int = 20
 
-// fibonacci returns the ith fibonacci number.
+// maxFibIndex is the index of the largest fibonacci number that fits in a uint16 (fib(24) = 46368).
+const maxFibIndex int = 24
+
+// fibonacci returns the ith fibonacci number, for i <= maxFibIndex.
 func fibonacci(i int) uint16 {
 	if i < fibLen {
 		return fibLookup[i]
 	}
-	return fibonacci(i-2) + fibonacci(i-1)
+	a, b := fibLookup[fibLen-2], fibLookup[fibLen-1]
+	for j := fibLen; j <= i; j++ {
+		a, b = b, a+b
+	}
+	return b
 }
 
 // ReadFibonacciInt parses 1 fibonacci encoded int from the data array, starting at the given index
@@ -34,12 +44,19 @@ func (bs *BitStream) ReadFibonacciInt() (uint16, error) {
 	// At the start of each loop, lastBit has been processed, nextBit has not. if both lastBit and
 	// nextBit are set, we discard nextBit and return the result
 	for i := 3; (lastBit == 0) || (nextBit == 0); i++ {
+		// Any bit past fib(maxFibIndex) would push the value over a uint16, so stop instead of reading on.
+		if i > maxFibIndex {
+			return 0, fmt.Errorf("error reading bit %d of Integer(Fibonacci): value exceeds %d", i, math.MaxUint16)
+		}
 		lastBit = nextBit
 		nextBit, err = bs.ReadByte1()
 		if err != nil {
 			return 0, fmt.Errorf("error reading bit %d of Integer(Fibonacci): %s", i, err)
 		}
 		if lastBit == 1 {
+			if result > math.MaxUint16-fibonacci(i) {
+				return 0, fmt.Errorf("error reading bit %d of Integer(Fibonacci): value exceeds %d", i, math.MaxUint16)
+			}
 			result = result + fibonacci(i)
 		}
 
